@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SOPProof | Video Inspection Report</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 35px 20px;
+    background: #f1f5f9;
+    color: #172033;
+    font-family: -apple-system, BlinkMacSystemFont,
+                 "Segoe UI", Arial, sans-serif;
+}
+
+.container {
+    max-width: 1150px;
+    margin: auto;
+    background: white;
+    padding: 38px;
+    border-radius: 18px;
+    box-shadow: 0 12px 35px rgba(20, 35, 60, 0.07);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.logo {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.subtitle {
+    color: #64748b;
+    margin-top: 5px;
+}
+
+.report-label {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-radius: 30px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.summary {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.summary h2 {
+    margin-top: 0;
+}
+
+.overall {
+    font-size: 23px;
+    font-weight: 800;
+    margin: 15px 0;
+}
+
+.status {
+    display: inline-block;
+    padding: 7px 11px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.success {
+    color: #15803d;
+    background: #dcfce7;
+}
+
+.warning {
+    color: #c2410c;
+    background: #fff1e6;
+}
+
+.neutral {
+    color: #475569;
+    background: #e2e8f0;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin: 25px 0 35px;
+}
+
+.stat {
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.stat strong {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 5px;
+}
+
+.stat span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+h2 {
+    font-size: 22px;
+    margin-top: 36px;
+}
+
+h3 {
+    margin: 0;
+}
+
+h4 {
+    margin: 20px 0 12px;
+}
+
+video {
+    width: 100%;
+    display: block;
+    background: #111827;
+    border-radius: 12px;
+    margin-top: 15px;
+}
+
+.media-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: #1d4ed8;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.frame-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 22px;
+    margin: 20px 0;
+}
+
+.frame-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.frame-header p {
+    color: #64748b;
+    margin: 5px 0 0;
+    font-size: 13px;
+}
+
+.frame-image {
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+    background: #f1f5f9;
+    border-radius: 9px;
+}
+
+/* Status outline around the frame image only. It never draws or implies
+   object-level detection boxes; those remain whatever the source frame
+   itself contains. */
+.frame-card.frame-safe .frame-image {
+    border: 2px solid #46c98d;
+}
+
+.frame-card.frame-uncertain .frame-image {
+    border: 2px dashed #f0a832;
+    outline: 2px dashed #f0a832;
+    outline-offset: 3px;
+}
+
+.demo-explanation-label {
+    color: #92400e;
+    font-size: 12px;
+    font-weight: 650;
+    margin-top: 8px;
+}
+
+.frame-summary {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 18px;
+}
+
+.frame-summary p,
+.evidence p {
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+.person-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 12px;
+}
+
+.person-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.evidence {
+    margin-top: 15px;
+    padding-top: 13px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.notice {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+    padding: 18px;
+    border-radius: 10px;
+    margin-top: 25px;
+    line-height: 1.6;
+}
+
+.limitations {
+    color: #64748b;
+    line-height: 1.8;
+}
+
+.muted {
+    color: #64748b;
+}
+
+.missing-image {
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 25px;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.error {
+    background: #fef2f2;
+    color: #b91c1c;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+footer {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 35px;
+    padding-top: 20px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+@media (max-width: 750px) {
+
+    .container {
+        padding: 20px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .overall {
+        font-size: 19px;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <div>
+            <div class="logo">SOPProof</div>
+            <div class="subtitle">
+                AI-Assisted Workplace Safety Inspection
+            </div>
+        </div>
+
+        <div class="report-label">
+            VIDEO INSPECTION REPORT
+        </div>
+
+    </div>
+
+    <div class="summary">
+
+        <h2>Inspection Summary</h2>
+
+        <p><strong>Source video:</strong> demo-video.mp4</p>
+        <p><strong>Duration:</strong> 3.00 seconds</p>
+        <p><strong>Generated:</strong> 04 November 2026, 03:07 PM IST</p>
+
+        <p><strong>Overall assessment:</strong></p>
+
+        <div class="overall">DEMO DATA: Review completed for demonstration.</div>
+
+        <span class="status warning">
+            Human review: Required
+        </span>
+
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            <strong>90</strong>
+            <span>Total video frames</span>
+        </div>
+
+        <div class="stat">
+            <strong>2</strong>
+            <span>Frames sampled</span>
+        </div>
+
+        <div class="stat">
+            <strong>2</strong>
+            <span>Successful AI reviews</span>
+        </div>
+
+        <div class="stat">
+            <strong>0</strong>
+            <span>Failed AI reviews</span>
+        </div>
+
+    </div>
+
+    <h2>Original Workplace Video</h2>
+
+    
+        <video controls preload="metadata" poster="video_review_frames/frame_0000.jpg">
+            <source src="../demo-video.mp4" type="video/mp4">
+            Your browser does not support video playback.
+        </video>
+        
+
+    
+        <div class="video-preview">
+            <video controls preload="metadata" poster="video_review_frames/frame_0000.jpg"
+                   style="width:100%;max-height:520px;background:#000;border-radius:12px;">
+                <source src="sopproof_video_preview.mp4" type="video/mp4">
+                Your browser does not support video playback.
+            </video>
+        </div>
+        
+
+    <h2>Frame-by-Frame AI Review</h2>
+
+    <p class="muted">
+        Original video frames selected for visual inspection
+        by Meta Muse Spark. Every assessment is tied to its
+        original video timestamp.
+    </p>
+
+    
+    <section class="frame-card frame-safe">
+
+        <div class="frame-header">
+
+            <div>
+                <h3>Frame 0</h3>
+                <p>Timestamp: 0.000 seconds</p>
+            </div>
+
+            <span class="status success">
+                All Helmets Visible
+            </span>
+
+        </div>
+
+        
+        <img
+            class="frame-image"
+            src="video_review_frames/frame_0000.jpg"
+            alt="Original video frame 0"
+        >
+        
+
+        
+        <div class="frame-summary">
+            <strong>Frame summary</strong>
+            <p>DEMO: Precomputed opening frame from sample footage.</p>
+        </div>
+
+        <h4>Worker assessments</h4>
+
+        
+    <div class="person-card">
+
+        <div class="person-heading">
+            <strong>Person 1</strong>
+
+            <span class="status success">
+                Helmet Visible
+            </span>
+        </div>
+
+        <div class="evidence">
+            <strong>Visual evidence</strong>
+            <p>DEMO: Precomputed frame assessment for the guest demonstration.</p>
+        </div>
+
+    </div>
+    
+        
+
+    </section>
+    
+    <section class="frame-card frame-uncertain">
+
+        <div class="frame-header">
+
+            <div>
+                <h3>Frame 50</h3>
+                <p>Timestamp: 1.667 seconds</p>
+            </div>
+
+            <span class="status neutral">
+                Uncertain
+            </span>
+
+        </div>
+
+        
+        <img
+            class="frame-image"
+            src="video_review_frames/frame_0050.jpg"
+            alt="Original video frame 50"
+        >
+        
+
+        
+        <div class="frame-summary">
+            <strong>Frame summary</strong>
+            <p>DEMO: Precomputed frame routed to human review.</p>
+        </div>
+
+        <h4>Worker assessments</h4>
+
+        
+    <div class="person-card">
+
+        <div class="person-heading">
+            <strong>Person 1</strong>
+
+            <span class="status neutral">
+                Uncertain
+            </span>
+        </div>
+
+        <div class="evidence">
+            <strong>Visual evidence</strong>
+            <p>DEMO: Precomputed frame assessment for the guest demonstration.</p>
+        </div>
+
+    </div>
+    
+        
+
+    </section>
+    
+
+    <h2>Limitations</h2>
+
+    <ul class="limitations">
+        <li>DEMO DATA — precomputed demonstration report, not a real inspection.</li>
+    </ul>
+
+    <div class="notice">
+        <strong>Important:</strong>
+        SOPProof provides prototype, visual evidence-based
+        assistance. This report is not a certified safety audit
+        or a legal determination. Only selected video frames
+        were reviewed by Muse Spark. Unreviewed intervals cannot
+        be assumed compliant. Potential concerns require
+        human verification.
+    </div>
+
+    <footer>
+        SOPProof | AI-Assisted Workplace Safety Inspection
+    </footer>
+
+</div>
+
+</body>
+</html>

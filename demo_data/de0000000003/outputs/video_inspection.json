@@ -1,0 +1,42 @@
+{
+  "source_video": "demo-video.mp4",
+  "overall_assessment": "DEMO DATA: Review completed for demonstration.",
+  "human_review_required": true,
+  "duration_seconds": 3.0,
+  "total_frames": 90,
+  "successful_frame_reviews": 2,
+  "failed_frame_reviews": 0,
+  "frames": [
+    {
+      "frame": 0,
+      "timestamp_seconds": 0.0,
+      "assessment": {
+        "overall_result": "all_helmets_visible",
+        "image_summary": "DEMO: Precomputed opening frame from sample footage.",
+        "people": [
+          {
+            "assessment": "helmet_visible",
+            "evidence": "DEMO: Precomputed frame assessment for the guest demonstration."
+          }
+        ]
+      }
+    },
+    {
+      "frame": 50,
+      "timestamp_seconds": 1.667,
+      "assessment": {
+        "overall_result": "uncertain",
+        "image_summary": "DEMO: Precomputed frame routed to human review.",
+        "people": [
+          {
+            "assessment": "uncertain",
+            "evidence": "DEMO: Precomputed frame assessment for the guest demonstration."
+          }
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "DEMO DATA \u2014 precomputed demonstration report, not a real inspection."
+  ]
+}

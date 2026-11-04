@@ -1,0 +1,71 @@
+# Secrets — never commit credentials
+.env
+*.pem
+*.key
+
+# Python environments and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local data: databases, real user evidence, generated reports
+data/
+uploads/
+outputs/
+
+# Backups and editor/OS noise
+backups/
+*.bak
+.DS_Store
+
+# Large test fixtures (kept locally, not in Git history)
+hardhat_video.mp4
+hardhat_tracking_preview.avi
+no_helmet_test.mp4
+sam_video_raw.txt
+sam_video_person_raw.txt
+
+# Synthetic guest demo: keep the complete demo dataset. The generic
+# outputs/ rule above would otherwise swallow the video demo tree.
+!demo_data/de0000000003/outputs/
+!demo_data/de0000000003/outputs/**
+
+# Watermarked Alamy stock previews and their derivatives — never publish
+/no_helmet_sample.jpg
+/no_helmet_overlay.jpg
+/sopproof_negative_result.jpg
+
+# Stale frontend copies (the active app is frontend/index.html only)
+frontend/index_backup.html
+frontend/gemini-code-*.html
+
+# Root test artifacts and one-off scripts. NOT excluded, because the
+# production video pipeline invokes them: test_sam_video.py,
+# test_sam_video_person.py, build_video_detections.py.
+*_raw.txt
+/video_detections.csv
+/video_person_detections.csv
+/video_integration_reference.txt
+/inspection_report.json
+/inspection_report_positive.json
+/render_*.py
+/associate_helmets.py
+/associate_negative.py
+/compare_boxes.py
+/inspect_person_records.py
+/inspect_video.py
+/inspect_video_assets.py
+/no_helmet_overlay.py
+/review_inspection.py
+/review_positive.py
+/summarize_video_inspection.py
+/test_backend.py
+/test_no_helmet.py
+/test_sam_image.py
+/test_sam_person.py
+/test_sam_person_image.py
+/test_spark.py
+/hardhat_boxes.jpg
+/person_boxes.jpg
+/sopproof_association.jpg

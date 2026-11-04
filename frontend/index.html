@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SOPProof — AI-powered workplace safety intelligence. Capture, detect, review, verify.">
+<meta name="theme-color" content="#080b0f">
+<title>SOPProof | Safety Intelligence</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e85a0c'/%3E%3Cg transform='translate(8 9)' fill='%23ffffff'%3E%3Cpath d='M15 26v-2.2A9.2 9.2 0 0 1 21.5 15V26h5V15a9.2 9.2 0 0 1 6.5 8.8V26'/%3E%3Crect x='8' y='26' width='32' height='4.6' rx='2.3'/%3E%3Crect x='13' y='33.4' width='22' height='3' rx='1.5' opacity='.72'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#07090d; --bg-2:#0c1017; --bg-3:#10161f; --bg-4:#151d29;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  /* Brand accent is safety orange. --lime is kept as a legacy alias so every
+     existing var(--lime) reference renders as the brand colour, not green. */
+  --brand:#ff6f1f; --brand-2:#ff8f4d; --brand-deep:#e85a0c; --brand-ink:#1d0f02;
+  --w-orange:#ff6f1f; --w-orange-2:#ff8f4d; --w-orange-deep:#e85a0c;
+  --lime:var(--brand); --mint:#46c98d; --warn:#f0a832; --crit:#ff5c5c;
+  --ink:#f5f7fa; --ink-2:#c6d0dd; --mut:#8b98a8; --mut-2:#5d6b7c;
+  --lime-ink:#1d0f02;
+  --shadow:0 12px 32px rgba(0,0,0,.35);
+  --r:14px; --r-s:10px;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+html[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f3f5f3; --bg-2:#ffffff; --bg-3:#f7f9f7; --bg-4:#e9ede9;
+  --line:rgba(16,24,20,.09); --line-2:rgba(16,24,20,.16);
+  --brand:#e85a0c; --brand-2:#f26d1d; --brand-deep:#c94e08; --brand-ink:#ffffff;
+  --w-orange:#e85a0c; --w-orange-2:#f26d1d; --w-orange-deep:#c94e08;
+  --lime:var(--brand); --mint:#0b7a49; --warn:#96600a; --crit:#b3261e;
+  --ink:#0f151c; --ink-2:#2d3947; --mut:#5b6a77; --mut-2:#8794a0;
+  --lime-ink:#ffffff;
+  --shadow:0 10px 28px rgba(20,35,20,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px;border-radius:6px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+::selection{background:var(--lime);color:var(--lime-ink)}
+.label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mut-2)}
+.mono{font-family:var(--mono)}
+
+/* ================= sidebar ================= */
+.sidebar{position:fixed;inset:0 auto 0 0;z-index:50;width:248px;display:flex;flex-direction:column;background:linear-gradient(180deg,var(--bg-3),var(--bg-2) 34%);border-right:1px solid var(--line-2);padding:22px 14px 16px}
+.brand{display:block;padding:4px 10px 18px;text-decoration:none;border-bottom:1px solid var(--line)}
+.brand-word{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:850;letter-spacing:-.02em;color:var(--ink)}
+.brand-mark{width:34px;height:34px;border-radius:9px;flex:0 0 auto}
+.brand-mark svg{width:21px;height:21px}
+.brand-accent{color:var(--brand)}
+.brand{position:relative}
+.brand-tag{display:block;margin-top:9px;font-size:10.5px;line-height:1.55;color:var(--mut-2);font-weight:550}
+.sys-line{display:none}
+.nav{margin-top:14px;flex:1}
+.nav-label{margin:18px 10px 7px;font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mut-2)}
+.nav-link{display:flex;align-items:center;gap:11px;margin:2px 0;padding:9px 10px;border-radius:9px;color:var(--mut);text-decoration:none;font-size:13.5px;font-weight:550;transition:.15s}
+.nav-link svg{width:17px;height:17px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.7;opacity:.72}
+.nav-link:hover{color:var(--ink);background:var(--bg-3)}
+.nav-link:hover svg{opacity:1}
+.nav-link.active{color:var(--ink);background:var(--bg-4);font-weight:650;box-shadow:inset 2px 0 0 var(--brand)}
+.nav-link.active svg{color:var(--brand);opacity:1}
+.side-foot{margin-top:auto;padding:14px;border:1px solid var(--line-2);border-radius:12px;background:var(--bg-3);box-shadow:inset 0 1px 0 rgba(255,255,255,.03),inset 2px 0 0 color-mix(in srgb,var(--brand) 55%,transparent);font-size:11px;line-height:1.5;color:var(--mut-2)}
+.side-foot strong{display:flex;align-items:center;gap:7px;color:var(--ink-2);font-size:11px;letter-spacing:.05em;margin-bottom:8px}
+.side-foot strong::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--mint);animation:blink 2.6s infinite;flex:0 0 auto}
+.sys-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.sys-list li{display:flex;align-items:center;gap:8px}
+.sys-list li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--mut-2);flex:0 0 auto}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.side-ver{margin:11px 4px 0;font-size:9.5px;color:var(--mut-2);font-family:var(--mono)}
+.main{margin-left:248px;min-height:100vh;background:radial-gradient(820px 430px at 88% -70px,color-mix(in srgb,var(--brand) 5%,transparent),transparent 62%)}
+.wrap{max-width:1320px;margin:0 auto;padding:0 clamp(22px,3.6vw,52px) 60px}
+
+/* ================= topbar / controls ================= */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0 14px;border-bottom:1px solid var(--line)}
+.top-path{font-size:11px;letter-spacing:.06em;color:var(--mut-2);font-weight:600}
+.top-path b{color:var(--brand);font-weight:700;margin:0 3px}
+.top-actions{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.status-chip{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--bg-2);font-size:11px;font-weight:600;color:var(--mut)}
+.status-chip i{width:7px;height:7px;border-radius:50%;background:var(--mut-2)}
+.status-chip.ok{color:var(--mint)} .status-chip.ok i{background:var(--mint);animation:blink 2.6s infinite}
+.status-chip.bad{color:var(--crit)} .status-chip.bad i{background:var(--crit)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border:1px solid var(--line-2);border-radius:10px;background:var(--bg-3);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;transition:.15s}
+.btn:hover{border-color:var(--mut);background:var(--bg-4)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);font-weight:750;box-shadow:0 8px 20px color-mix(in srgb,var(--brand) 20%,transparent)}
+.btn.primary:hover:not(:disabled){background:var(--brand-2);border-color:var(--brand-2)}
+.btn.primary:disabled{opacity:.4;cursor:not-allowed}
+.btn.small{min-height:33px;padding:0 12px;font-size:12px;border-radius:8px}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--bg-3)}
+.btn.confirm{border-color:color-mix(in srgb,var(--mint) 50%,var(--line));color:var(--mint);background:transparent}
+.btn.dismiss{border-color:color-mix(in srgb,var(--crit) 45%,var(--line));color:var(--crit);background:transparent}
+.btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8}
+.link-btn{border:0;background:none;padding:0;color:var(--ink-2);font-size:12.5px;font-weight:650;cursor:pointer;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--line-2)}
+.link-btn:hover{color:var(--lime);text-decoration-color:var(--lime)}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:650;white-space:nowrap;border:1px solid var(--line-2);color:var(--mut)}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:0 0 auto}
+.badge.safe{color:var(--mint);border-color:color-mix(in srgb,var(--mint) 40%,var(--line))}
+.badge.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,var(--line))}
+.badge.bad{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 45%,var(--line))}
+.badge.info{color:var(--mut)}
+.badge.lime{color:var(--lime-ink);background:var(--lime);border-color:var(--lime)}
+.badge.lime::before{background:var(--lime-ink)}
+.empty{padding:38px 20px;text-align:center;color:var(--mut);font-size:13px;line-height:1.65;border:1px dashed var(--line-2);border-radius:var(--r);background:var(--bg-2)}
+.empty strong{display:block;color:var(--ink-2);font-size:14.5px;margin-bottom:5px}
+.skeleton{height:72px;margin:10px 0;border-radius:var(--r);background:var(--bg-3);animation:pulse 1.3s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.spinner{width:16px;height:16px;flex:0 0 auto;border:2px solid color-mix(in srgb,var(--lime) 25%,transparent);border-top-color:var(--lime);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;right:20px;bottom:20px;z-index:100;max-width:min(380px,calc(100vw - 32px));padding:13px 16px;border:1px solid var(--line-2);border-radius:12px;background:var(--bg-3);color:var(--ink);box-shadow:var(--shadow);font-size:13px;opacity:0;pointer-events:none;transform:translateY(6px);transition:.18s}
+.toast.show{opacity:1;transform:none}
+
+/* ================= guest login gate ================= */
+.guest-gate{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:20px}
+.guest-gate[hidden]{display:none!important}
+.guest-gate-backdrop{position:absolute;inset:0;background:rgba(4,6,9,.66)}
+.guest-gate-card{position:relative;width:100%;max-width:460px;padding:30px 30px 26px;border:1px solid var(--line-2);border-radius:18px;background:var(--bg-2);color:var(--ink);box-shadow:0 28px 64px rgba(0,0,0,.48);animation:gatein .22s ease both}
+@keyframes gatein{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+.guest-gate-close{position:absolute;top:14px;right:14px;display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--mut);cursor:pointer}
+.guest-gate-close:hover{color:var(--ink);border-color:var(--line-2);background:var(--bg-3)}
+.guest-gate-close svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8}
+.guest-gate-head{display:flex;align-items:center;gap:13px}
+.guest-gate-mark{display:grid;place-items:center;width:46px;height:46px;flex:0 0 auto;border-radius:12px;background:linear-gradient(145deg,var(--brand-2),var(--brand-deep));box-shadow:0 8px 22px color-mix(in srgb,var(--brand) 26%,transparent)}
+.guest-gate-mark svg{width:28px;height:28px;display:block}
+.guest-gate-kicker{font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--brand)}
+.guest-gate-card h2{margin:18px 0 0;font-size:24px;font-weight:850;letter-spacing:-.025em;line-height:1.2}
+.guest-gate-card p.guest-gate-desc{margin:11px 0 0;font-size:13.5px;line-height:1.7;color:var(--mut)}
+.guest-gate-actions{display:grid;gap:10px;margin-top:24px}
+.guest-gate-actions .btn{min-height:50px;font-size:14px;border-radius:11px;width:100%}
+.guest-gate-note{margin:16px 0 0;font-size:11.5px;line-height:1.6;color:var(--mut-2);text-align:center}
+@media(max-width:640px){.guest-gate{padding:14px}.guest-gate-card{padding:24px 20px 20px}.guest-gate-card h2{font-size:21px}}
+
+/* ================= welcome (entry, no sidebar) ================= */
+.welcome{
+  --w-orange:#ff6f1f; --w-orange-2:#ff8f4d; --w-orange-deep:#e85a0c;
+  --w-mint:#55e6a5; --w-panel:#0b0f16; --w-panel-2:#111826;
+  min-height:100dvh; position:relative; overflow:hidden; background:var(--bg); isolation:isolate;
+}
+.welcome::before{content:"";position:absolute;inset:0;z-index:-2;background:
+  radial-gradient(720px 460px at 86% 30%,rgba(255,111,31,.15),transparent 62%),
+  radial-gradient(560px 380px at 8% 88%,rgba(85,230,165,.055),transparent 60%),
+  var(--bg)}
+.welcome::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.5;background:
+  linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(900px 620px at 62% 42%,#000 30%,transparent 78%);
+  mask-image:radial-gradient(900px 620px at 62% 42%,#000 30%,transparent 78%)}
+html[data-theme="light"] .welcome{--w-orange:#e85a0c;--w-orange-2:#f26d1d;--w-orange-deep:#c94e08}
+html[data-theme="light"] .welcome::before{background:
+  radial-gradient(720px 460px at 86% 30%,rgba(255,111,31,.14),transparent 62%),
+  radial-gradient(560px 380px at 8% 88%,rgba(11,122,73,.06),transparent 60%),
+  var(--bg)}
+html[data-theme="light"] .welcome::after{background:
+  linear-gradient(rgba(15,21,28,.045) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(15,21,28,.045) 1px,transparent 1px);
+  background-size:56px 56px}
+.welcome :focus-visible{outline-color:var(--w-orange)}
+.welcome-inner{min-height:100dvh;display:flex;flex-direction:column;max-width:1320px;margin:0 auto;padding:0 clamp(22px,3.6vw,52px)}
+/* header */
+.welcome-top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0 6px}
+.w-brand{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:0}
+.w-mark{display:grid;place-items:center;width:42px;height:42px;flex:0 0 auto;border-radius:11px;background:linear-gradient(145deg,var(--w-orange-2),var(--w-orange-deep));box-shadow:0 8px 22px rgba(232,90,12,.28),inset 0 1px 0 rgba(255,255,255,.35)}
+.w-mark svg{width:26px;height:26px;display:block}
+.w-brand-text{display:flex;flex-direction:column;gap:1px;min-width:0}
+.w-word{font-size:21px;font-weight:850;letter-spacing:-.03em;line-height:1;color:var(--ink);white-space:nowrap}
+.w-word .w-accent{color:var(--w-orange)}
+.w-tag{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mut-2);white-space:nowrap}
+.w-theme{flex:0 0 auto}
+/* hero */
+.welcome-hero{flex:1;display:grid;grid-template-columns:minmax(0,1.02fr) minmax(360px,.98fr);gap:clamp(36px,5vw,72px);align-items:center;padding:clamp(26px,4vh,48px) 0 34px}
+.w-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--w-orange)}
+.w-eyebrow::before{content:"";width:26px;height:2px;background:var(--w-orange);flex:0 0 auto}
+.welcome-copy h1{margin:20px 0 0;font-size:clamp(42px,4.6vw,64px);font-weight:850;letter-spacing:-.04em;line-height:1.02;color:var(--ink)}
+.welcome-copy h1 .w-h1-top{display:block}
+.welcome-copy h1 .w-h1-brand{display:block}
+.welcome-copy h1 .w-accent{color:var(--w-orange)}
+.welcome-lede{margin:20px 0 0;max-width:48ch;font-size:16px;line-height:1.72;color:var(--mut)}
+.welcome-lede strong{color:var(--ink-2);font-weight:700}
+.w-cta-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:30px}
+.welcome-cta{min-height:52px;padding:0 30px;font-size:15px;font-weight:800;border-radius:12px;background:var(--w-orange);border:1px solid var(--w-orange);color:#1c0e02;box-shadow:0 12px 28px rgba(232,90,12,.26);transition:background .16s,border-color .16s,transform .16s,box-shadow .16s}
+.welcome-cta:hover{background:var(--w-orange-2);border-color:var(--w-orange-2);transform:translateY(-1px);box-shadow:0 16px 32px rgba(232,90,12,.3)}
+.welcome-cta:active{transform:translateY(0)}
+.w-cta-note{font-size:12px;line-height:1.55;color:var(--mut-2);max-width:22ch}
+.welcome-note{display:flex;align-items:flex-start;gap:8px;margin:22px 0 0;font-size:12px;line-height:1.6;color:var(--mut-2);max-width:52ch}
+.welcome-note::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--w-mint);flex:0 0 auto;margin-top:6px}
+/* hero visual */
+.w-visual{position:relative;margin:0;border:1px solid var(--line-2);border-radius:20px;background:linear-gradient(160deg,var(--w-panel-2),var(--w-panel) 58%);overflow:hidden;box-shadow:0 28px 60px rgba(0,0,0,.42)}
+.w-visual::before,.w-visual::after{content:"";position:absolute;width:24px;height:24px;z-index:4;pointer-events:none}
+.w-visual::before{top:12px;left:12px;border-top:1.5px solid rgba(255,143,77,.85);border-left:1.5px solid rgba(255,143,77,.85)}
+.w-visual::after{bottom:12px;right:12px;border-bottom:1.5px solid rgba(255,143,77,.85);border-right:1.5px solid rgba(255,143,77,.85)}
+.w-visual svg{display:block;width:100%;height:auto}
+.w-visual{aspect-ratio:28/22}
+.w-visual img.hero-photo{display:block;width:100%;height:100%;object-fit:cover}
+.synthetic-label{position:absolute;left:14px;bottom:12px;z-index:10;background:rgba(0,0,0,.7);color:#fff;padding:7px 11px;border-radius:8px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-align:left;white-space:nowrap;max-width:calc(100% - 28px)}
+@media(max-width:640px){.synthetic-label{left:10px;bottom:9px;font-size:8px;padding:6px 8px;letter-spacing:.05em}}
+.guest-sample{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;padding:13px 15px;border:1px dashed var(--line-2);border-radius:12px;background:var(--bg-3)}
+.guest-allowance{margin:0 0 20px;padding:14px 18px;border:1px solid var(--line-2);border-radius:14px;background:var(--bg-2);box-shadow:var(--shadow)}
+.ga-main{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ga-main .label{color:var(--brand)}
+.ga-main strong{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink)}
+.ga-note{margin:7px 0 0;font-size:11.5px;line-height:1.6;color:var(--mut-2)}
+.guest-limit{margin-top:12px;padding:13px 15px;border:1px solid color-mix(in srgb,var(--brand) 45%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--brand) 7%,var(--bg-2))}
+.guest-limit strong{font-size:14px;font-weight:750;color:var(--ink)}
+.guest-limit p{margin:5px 0 11px;font-size:12.5px;line-height:1.6;color:var(--mut)}
+.guest-sample span{font-size:12.5px;color:var(--mut)}
+.guest-sample span strong{color:var(--ink-2)}
+/* Guest-only: compact the dropzone's vertical spacing so the pre-loaded
+   sample action stays in view below the Guest Demo banner. The dropzone
+   contents and the authenticated layout are unchanged. */
+body.is-guest .dropzone{min-height:0;padding:8px 34px;gap:3px}
+@media(max-width:640px){body.is-guest .dropzone{padding:2px 18px;gap:0;line-height:1.12}}
+.demo-replay{margin-top:16px;padding:18px;border:1px solid color-mix(in srgb,var(--brand) 40%,var(--line));border-radius:14px;background:var(--bg-3)}
+.demo-replay-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.demo-replay-head span{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--mut)}
+.demo-replay .btn{margin-top:14px}
+.check.is-disabled{color:var(--mut-2);cursor:not-allowed;opacity:.62}
+.check input:disabled{cursor:not-allowed}
+.roadmap-badge{margin-left:auto;padding:2px 7px;border:1px solid var(--line-2);border-radius:999px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--mut-2)}
+.check.is-disabled .roadmap-badge{margin-left:2px}
+.sys-list li.sys-ok{color:var(--ink-2)}
+.sys-list li.sys-ok::before{background:var(--mint)}
+.sys-list li.sys-off{color:var(--mut-2)}
+.sys-list li.sys-off::before{background:var(--crit)}
+.w-visual-tag{position:absolute;top:16px;left:42px;z-index:5;display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(5,8,12,.72);color:#c6d0dd;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.12em}
+.w-visual-tag i{width:6px;height:6px;border-radius:50%;background:var(--w-orange-2);flex:0 0 auto}
+.w-detect{position:absolute;top:15%;right:7%;z-index:5;display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(85,230,165,.45);border-radius:10px;background:rgba(5,10,8,.82);color:#eafff5;font-size:12px;font-weight:750;box-shadow:0 10px 24px rgba(0,0,0,.3)}
+.w-detect i{width:8px;height:8px;border-radius:50%;background:var(--w-mint);flex:0 0 auto}
+.w-detect small{display:block;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;color:#9fd8bf}
+.w-review{position:absolute;left:16px;bottom:16px;z-index:5;max-width:250px;padding:13px 15px;border:1px solid rgba(255,255,255,.13);border-radius:13px;background:rgba(7,10,15,.86);color:#dfe8f2;box-shadow:0 14px 30px rgba(0,0,0,.32)}
+.w-review strong{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800}
+.w-review strong::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--w-mint);flex:0 0 auto}
+.w-review span{display:block;margin-top:4px;font-size:11px;line-height:1.55;color:#9fb0c3}
+.w-visual-foot{position:absolute;right:42px;bottom:16px;z-index:5;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.12em;color:rgba(198,208,221,.75);text-align:right}
+/* workflow */
+.w-flow{list-style:none;margin:0 0 8px;padding:0;display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:16px;background:var(--bg-2);overflow:hidden}
+.w-flow li{display:flex;gap:13px;align-items:flex-start;padding:18px 20px;min-width:0}
+.w-flow li + li{border-left:1px solid var(--line)}
+.w-flow b{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--w-orange);padding-top:3px;flex:0 0 auto}
+.w-flow strong{display:block;font-size:14px;font-weight:800;letter-spacing:-.01em;color:var(--ink)}
+.w-flow small{display:block;margin-top:2px;font-size:11.5px;line-height:1.5;color:var(--mut-2)}
+.w-flow-arrow{align-self:center;margin-left:auto;color:var(--mut-2);flex:0 0 auto}
+.welcome-support{margin:16px 0 0;font-size:11.5px;letter-spacing:.04em;color:var(--mut-2);text-align:center}
+.welcome-support b{color:var(--mut);font-weight:700}
+.welcome-foot{margin:0;padding:14px 0 22px;font-size:10px;letter-spacing:.1em;color:var(--mut-2);text-align:center}
+/* auth (login / register, chrome-free like welcome) */
+.auth-card{width:100%;max-width:420px;margin:0 auto;border:1px solid var(--line-2);border-radius:18px;background:var(--bg-2);padding:30px 30px 26px;box-shadow:0 24px 54px rgba(0,0,0,.34)}
+.auth-card .w-brand{margin-bottom:20px}
+.auth-card h1{margin:0;font-size:26px;font-weight:850;letter-spacing:-.03em}
+.auth-sub{margin:8px 0 0;font-size:13px;line-height:1.65;color:var(--mut)}
+.auth-form{display:grid;gap:14px;margin-top:22px}
+.auth-field{display:grid;gap:6px}
+.auth-field label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut-2)}
+.auth-input{min-height:44px;padding:0 13px;border:1px solid var(--line-2);border-radius:10px;background:var(--bg-3);color:var(--ink);font-size:14px;width:100%}
+.auth-input:focus{border-color:var(--brand);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--brand) 30%,transparent)}
+.auth-submit{min-height:48px;font-size:14.5px;border-radius:11px;width:100%}
+.auth-err{display:none;padding:11px 13px;border-radius:10px;border:1px solid color-mix(in srgb,var(--crit) 50%,var(--line));background:color-mix(in srgb,var(--crit) 7%,var(--bg-2));color:var(--ink-2);font-size:12.5px;line-height:1.55}
+.auth-err.show{display:block}
+.auth-or{display:flex;align-items:center;gap:14px;margin:22px 0 16px;color:var(--mut-2);font-size:10px;font-weight:800;letter-spacing:.18em}
+.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.guest-btn{width:100%;min-height:48px;border-radius:11px;border:1px solid color-mix(in srgb,var(--brand) 55%,var(--line-2));background:color-mix(in srgb,var(--brand) 9%,var(--bg-3));color:var(--ink);font-size:14.5px;font-weight:750}
+.guest-btn:hover{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 14%,var(--bg-3))}
+.guest-note{margin:12px 0 0;font-size:12px;line-height:1.6;color:var(--mut-2);text-align:center}
+.demo-banner{display:flex;gap:12px;align-items:flex-start;margin:22px 0 0;padding:14px 18px;border:1px solid color-mix(in srgb,var(--brand) 45%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--brand) 7%,var(--bg-2));font-size:13px;line-height:1.65;color:var(--mut)}
+.demo-banner strong{color:var(--ink)}
+.demo-banner .badge{flex:0 0 auto;margin-top:2px}
+.auth-alt{margin:18px 0 0;font-size:12.5px;color:var(--mut-2);text-align:center}
+.auth-alt button{color:var(--brand);font-weight:700;background:none;border:0;cursor:pointer;font:inherit;text-decoration:underline;text-underline-offset:3px}
+.side-user{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg-3)}
+.side-user span{font-size:11.5px;font-weight:650;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.side-user .role{color:var(--brand);font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;margin-left:5px}
+@media(max-width:1020px){
+  .welcome-hero{grid-template-columns:1fr;gap:30px;padding-top:24px}
+  .welcome-copy{max-width:640px}
+  .w-visual{max-width:640px;width:100%}
+  .w-flow{grid-template-columns:1fr 1fr}
+  .w-flow li + li{border-left:0}
+  .w-flow li:nth-child(even){border-left:1px solid var(--line)}
+  .w-flow li:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media(max-width:640px){
+  .welcome-top{padding-top:16px}
+  .w-tag{display:none}
+  .w-word{font-size:19px}
+  .welcome-copy h1{font-size:38px}
+  .welcome-lede{font-size:15px}
+  .welcome-cta{width:100%}
+  .w-cta-note{max-width:none}
+  .w-visual{border-radius:16px}
+  .w-detect{top:12%;right:5%;padding:7px 10px;font-size:11px}
+  .w-review{left:10px;bottom:10px;max-width:210px;padding:11px 12px}
+  .w-visual-tag{left:34px;top:12px}
+  .w-visual-foot{display:none}
+  .w-flow{grid-template-columns:1fr}
+  .w-flow li:nth-child(even){border-left:0}
+  .w-flow li + li{border-top:1px solid var(--line)}
+  .w-flow li:nth-child(n+3){border-top:1px solid var(--line)}
+}
+
+/* ================= overview ================= */
+.view{display:none}.view.active{display:block;animation:viewin .25s ease both}
+@keyframes viewin{from{opacity:0}to{opacity:1}}
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:clamp(28px,4vw,56px);align-items:center;padding:48px 0 38px}
+.hero-copy .label{display:inline-flex;align-items:center;gap:10px;color:var(--brand)}
+.hero-copy .label::before{content:"";width:26px;height:2px;background:var(--brand);flex:0 0 auto}
+.hero h1{margin:18px 0 0;font-size:clamp(40px,4.2vw,58px);font-weight:850;line-height:1.04;letter-spacing:-.04em}
+.hero h1 span{display:block}.hero h1 .dim{color:var(--mut-2)}
+.hero-lede{margin:20px 0 0;max-width:54ch;font-size:15px;line-height:1.75;color:var(--mut)}
+.hero-lede strong{color:var(--ink)}
+.hero-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+.hero-note{margin-top:14px;font-size:11.5px;color:var(--mut-2)}
+.featured{border:1px solid var(--line-2);border-radius:18px;background:var(--bg-2);overflow:hidden;box-shadow:0 22px 48px rgba(0,0,0,.34)}
+.featured-media{position:relative;aspect-ratio:16/10;overflow:hidden;background:#04070a;display:grid;place-items:center;color:var(--mut-2);font-family:var(--mono);font-size:10px;letter-spacing:.1em}
+.featured-media img,.featured-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.featured-media::before,.featured-media::after{content:"";position:absolute;width:22px;height:22px;z-index:2;pointer-events:none}
+.featured-media::before{top:12px;left:12px;border-top:1.5px solid rgba(255,143,77,.85);border-left:1.5px solid rgba(255,143,77,.85)}
+.featured-media::after{bottom:12px;right:12px;border-bottom:1.5px solid rgba(255,143,77,.85);border-right:1.5px solid rgba(255,143,77,.85)}
+.featured-tag{position:absolute;top:12px;right:12px;z-index:3}
+.featured-body{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 20px 20px;border-top:1px solid var(--line)}
+.featured-body h3{margin:5px 0 0;font-size:15px;font-weight:700;overflow-wrap:anywhere}
+.featured-meta{font-family:var(--mono);font-size:9.5px;color:var(--mut-2);margin-top:5px;line-height:1.7}
+.pipeline{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:18px 20px;border:1px solid var(--line-2);border-radius:16px;background:var(--bg-2)}
+.pipe-step{display:flex;align-items:baseline;gap:9px}
+.pipe-step b{font-family:var(--mono);font-size:9.5px;color:var(--brand)}
+.pipe-step span{font-size:13.5px;font-weight:700}
+.pipe-step small{font-size:11px;color:var(--mut-2)}
+.pipe-arrow{color:var(--mut-2);margin:0 6px}
+.band{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px}
+.band-cell{border:1px solid var(--line-2);border-radius:16px;background:var(--bg-2);padding:20px;transition:border-color .15s}
+.band-cell:hover{border-color:color-mix(in srgb,var(--brand) 32%,var(--line-2))}
+.band-cell .num{display:block;margin-top:12px;font-size:38px;font-weight:850;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.band-cell.hero-metric .num{color:var(--mint)}
+.band-cell .num.amber{color:var(--warn)}
+.band-cell p{margin:10px 0 0;font-size:11.5px;line-height:1.6;color:var(--mut-2)}
+.band-cell p b{color:var(--ink-2)}
+.meter{height:4px;margin-top:12px;border-radius:99px;background:var(--bg-4);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--mint);transition:width .5s}
+.ppe-strip{display:flex;align-items:center;gap:16px;margin-top:14px;padding:14px 18px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2)}
+.ppe-strip .label{flex:0 0 auto}
+.ppe-strip .meter{flex:1;margin:0}
+.ppe-strip strong{font-size:20px;font-weight:800;color:var(--mint);font-variant-numeric:tabular-nums}
+.ppe-strip span{font-size:11.5px;color:var(--mut-2)}
+.sect{margin-top:38px}
+.sect-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px}
+.sect-head h2{margin:0;font-size:21px;font-weight:750;letter-spacing:-.02em}
+.sect-head p{margin:4px 0 0;font-size:12.5px;color:var(--mut)}
+.panel{border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2)}
+.panel-pad{padding:20px}
+.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.panel-head h3{margin:0;font-size:15px;font-weight:700}
+.panel-head p{margin:4px 0 0;font-size:12px;color:var(--mut);line-height:1.6}
+.grid-launch{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.launch-cell{border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2);padding:22px;transition:border-color .15s,transform .15s}
+.launch-cell:hover{border-color:var(--line-2)}
+.launch-kicker{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.launch-ico{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:var(--bg-4);color:var(--lime)}
+.launch-ico svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6}
+.launch-cell h3{margin:15px 0 6px;font-size:18px;font-weight:750;letter-spacing:-.01em}
+.launch-cell p{margin:0;font-size:12.5px;line-height:1.65;color:var(--mut);min-height:40px}
+.launch-actions{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+.file-chip{font-size:12px;color:var(--mut);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.file-chip:hover{color:var(--lime)}
+.drop-strip{margin-top:14px;padding:11px;border:1px dashed var(--line-2);border-radius:10px;text-align:center;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--mut-2);transition:.15s}
+.drop-strip.over{border-color:var(--lime);color:var(--lime)}
+.flag-row{display:flex;gap:13px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}
+.flag-row:last-child{border-bottom:0}
+.flag-sev{font-family:var(--mono);font-size:8.5px;font-weight:800;letter-spacing:.08em;padding:4px 7px;border-radius:6px;flex:0 0 auto;margin-top:2px}
+.flag-sev.high{color:#fff;background:var(--crit)} .flag-sev.rev{color:#241a04;background:var(--warn)}
+.flag-main{flex:1;min-width:0}
+.flag-main strong{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flag-main span{display:block;margin-top:3px;font-size:11.5px;color:var(--mut)}
+.ev-list{display:flex;flex-direction:column}
+.ev-item{display:flex;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.ev-item:last-child{border-bottom:0}
+.ev-item:hover .ev-name{color:var(--lime)}
+.ev-thumb{position:relative;width:132px;height:80px;flex:0 0 auto;overflow:hidden;border-radius:10px;background:var(--bg-4);display:grid;place-items:center;color:var(--mut-2)}
+.ev-thumb img{width:100%;height:100%;object-fit:cover}
+.ev-thumb svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.5}
+.ev-thumb em{position:absolute;left:7px;bottom:7px;padding:2px 6px;border-radius:5px;background:rgba(4,7,10,.85);color:#dfe8f2;font-family:var(--mono);font-size:8px;font-style:normal;font-weight:700}
+.ev-main{flex:1;min-width:0}
+.ev-name{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.ev-meta{margin-top:3px;font-size:12px;color:var(--mut)}
+.ev-stats{display:flex;gap:20px;flex:0 0 auto;text-align:right}
+.ev-stats div b{display:block;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.ev-stats div span{font-size:9px;letter-spacing:.08em;color:var(--mut-2);text-transform:uppercase;font-weight:700}
+.ev-side{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:0 0 auto}
+
+/* ================= tables ================= */
+.table-scroll{overflow-x:auto}
+table.grid{width:100%;min-width:880px;border-collapse:collapse;text-align:left}
+table.grid th{padding:11px 16px;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--mut-2);border-bottom:1px solid var(--line);white-space:nowrap;text-transform:uppercase}
+table.grid td{padding:13px 16px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+table.grid tbody tr:hover td{background:var(--bg-3)}
+table.grid tbody tr:last-child td{border-bottom:0}
+table.grid tbody tr.flagged-row td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
+.media-cell{display:flex;align-items:center;gap:12px;min-width:210px}
+.thumb{position:relative;display:grid;place-items:center;width:62px;height:46px;flex:0 0 auto;overflow:hidden;border-radius:8px;background:var(--bg-4);color:var(--mut-2)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6}
+.thumb em{position:absolute;left:4px;bottom:4px;padding:1px 5px;border-radius:4px;background:rgba(4,7,10,.85);color:#dfe8f2;font-family:var(--mono);font-size:7.5px;font-style:normal;font-weight:700}
+.media-name{display:block;max-width:240px;font-size:13px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.id-chip{margin-top:3px;padding:0;border:0;background:none;color:var(--mut-2);font-family:var(--mono);font-size:9.5px;cursor:pointer}
+.id-chip:hover{color:var(--lime)}
+.t-main{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.t-sub{display:block;margin-top:2px;font-family:var(--mono);font-size:9.5px;color:var(--mut-2);white-space:nowrap}
+.findings{display:flex;flex-wrap:wrap;gap:5px;max-width:250px}
+.row-actions{display:flex;gap:6px;align-items:center;white-space:nowrap}
+.icon-btn{display:grid;place-items:center;width:33px;height:33px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--mut);cursor:pointer}
+.icon-btn:hover{color:var(--lime);border-color:var(--line-2)}
+.icon-btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8}
+
+/* ================= workspaces ================= */
+.page-head{padding:36px 0 24px}
+.page-head .label{color:var(--lime)}
+.page-head h2{margin:12px 0 0;font-size:clamp(32px,3.4vw,44px);font-weight:800;letter-spacing:-.03em;line-height:1.08}
+.page-head p{margin:11px 0 0;max-width:58ch;font-size:14px;line-height:1.7;color:var(--mut)}
+.tool-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:clamp(22px,3vw,40px);align-items:start}
+.rail{display:flex;margin-bottom:18px;overflow-x:auto}
+.rail div{flex:1;min-width:128px;padding-right:14px}
+.rail div + div{padding-left:14px;border-left:1px solid var(--line)}
+.rail b{font-family:var(--mono);font-size:9.5px;color:var(--lime)}
+.rail span{display:block;margin-top:4px;font-size:13px;font-weight:700}
+.rail small{display:block;font-size:11px;color:var(--mut-2);line-height:1.5;margin-top:2px}
+.ingest{border:1px solid var(--line);border-radius:16px;background:var(--bg-2);padding:20px}
+.dropzone{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:280px;padding:34px;border:1.5px dashed var(--line-2);border-radius:14px;background:var(--bg-3);text-align:center;cursor:pointer;transition:.16s}
+.dropzone::before,.dropzone::after{content:"";position:absolute;width:22px;height:22px;pointer-events:none}
+.dropzone::before{top:12px;left:12px;border-top:1.5px solid var(--mut-2);border-left:1.5px solid var(--mut-2);border-top-left-radius:8px}
+.dropzone::after{bottom:12px;right:12px;border-bottom:1.5px solid var(--mut-2);border-right:1.5px solid var(--mut-2);border-bottom-right-radius:8px}
+.dropzone:hover,.dropzone.over{border-color:var(--lime);background:color-mix(in srgb,var(--lime) 4%,var(--bg-3))}
+.dz-kicker{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--lime)}
+.dropzone strong{font-size:25px;font-weight:800;letter-spacing:-.02em}
+.dropzone small{font-size:12.5px;color:var(--mut)}
+.dz-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:var(--bg-4);color:var(--lime)}
+.dz-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6}
+.hidden-input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.selected{display:none;margin-top:16px}
+.selected.show{display:block;animation:reveal .3s ease both}
+@keyframes reveal{from{opacity:0}to{opacity:1}}
+.sel-frame{position:relative;background:#04070a;border-radius:12px;overflow:hidden}
+.sel-frame::before,.sel-frame::after{content:"";position:absolute;width:22px;height:22px;z-index:2;pointer-events:none}
+.sel-frame::before{top:12px;left:12px;border-top:1.5px solid rgba(245,247,250,.8);border-left:1.5px solid rgba(245,247,250,.8)}
+.sel-frame::after{bottom:12px;right:12px;border-bottom:1.5px solid rgba(245,247,250,.8);border-right:1.5px solid rgba(245,247,250,.8)}
+.sel-frame img,.sel-frame video{display:block;width:100%;max-height:420px;object-fit:contain}
+.scan-chip{position:absolute;top:12px;right:12px;z-index:3;display:none;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;background:rgba(4,7,10,.88);border:1px solid color-mix(in srgb,var(--lime) 55%,transparent);color:var(--lime);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em}
+.scan-chip i{width:7px;height:7px;border-radius:50%;background:var(--lime);animation:blink 1.1s infinite}
+.sel-frame.scanning .scan-chip{display:inline-flex}
+.sel-frame.scanning::before{content:"";position:absolute;left:0;right:0;top:0;width:auto;height:2px;z-index:2;border:0;background:var(--lime);animation:evscan 2.4s ease-in-out infinite}
+@keyframes evscan{0%{top:0;opacity:0}12%{opacity:1}88%{opacity:1}100%{top:calc(100% - 2px);opacity:0}}
+.sel-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 2px 0}
+.sel-meta strong{display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:460px}
+.sel-meta span{display:block;margin-top:2px;font-family:var(--mono);font-size:9.5px;color:var(--mut-2)}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 0;padding:14px 0 0;border-top:1px solid var(--line)}
+.facts div{min-width:0}
+.facts dt{font-size:9.5px;font-weight:700;letter-spacing:.12em;color:var(--mut-2);text-transform:uppercase}
+.facts dd{margin:5px 0 0;font-size:13px;font-weight:700;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.facts dd.ready{color:var(--mint)}
+.action-bar{display:flex;align-items:center;gap:16px;margin-top:18px}
+.action-bar .btn.primary{flex:1;min-height:52px;font-size:14.5px;border-radius:12px}
+.action-meta{min-width:180px}
+.action-meta b{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--mint)}
+.action-meta span{font-size:11px;color:var(--mut-2);line-height:1.5}
+.action-bar.idle .action-meta b{color:var(--mut-2)}
+.alert{display:none;margin-top:16px;padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.6;border:1px solid var(--line)}
+.alert.show{display:block}
+.alert.err{border-color:color-mix(in srgb,var(--crit) 50%,var(--line));background:color-mix(in srgb,var(--crit) 6%,var(--bg-2))}
+.alert.err strong{color:var(--crit)}
+.alert.ok{border-color:color-mix(in srgb,var(--mint) 45%,var(--line));background:color-mix(in srgb,var(--mint) 5%,var(--bg-2))}
+.alert.ok strong{color:var(--mint)}
+.alert p{margin:4px 0 9px;color:var(--mut)}
+.processing{display:none;margin-top:18px;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--bg-3)}
+.processing.show{display:block}
+.proc-top{display:flex;align-items:center;gap:11px}
+.proc-title{font-size:16.5px;font-weight:750;letter-spacing:-.01em}
+.proc-sub{margin-left:auto;text-align:right;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--mut-2);line-height:1.7}
+.proc-sub .elapsed{font-size:13px;color:var(--lime)}
+.stage-track{margin-top:16px}
+.stages{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.stages li{display:flex;align-items:center;gap:13px;padding:11px 2px;border-bottom:1px solid var(--line)}
+.stages li:last-child{border-bottom:0}
+.stages .n{font-family:var(--mono);font-size:10px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line-2);flex:0 0 auto;color:var(--mut-2);background:var(--bg-2)}
+.stages .st-name{font-size:13.5px;font-weight:650;color:var(--ink-2)}
+.stages .st-desc{font-size:11.5px;color:var(--mut-2);margin-left:2px}
+.stages .st-state{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--mut-2);flex:0 0 auto}
+.stages li.live .n{border-color:var(--lime);color:var(--lime);animation:blink 1.2s infinite}
+.stages li.live .st-name{color:var(--ink)}
+.stages li.live .st-state{color:var(--lime)}
+.stages li.done .n{border-color:var(--mint);background:var(--mint);color:#06130c}
+.stages li.done .st-state{color:var(--mint)}
+.stages li.next .st-state{color:var(--warn)}
+.proc-note{margin:14px 0 0;font-size:11.5px;line-height:1.65;color:var(--mut-2)}
+.samples{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.samples-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;align-items:baseline}
+.samples-head strong{font-size:13.5px}
+.samples-head span{font-family:var(--mono);font-size:9px;color:var(--mut-2)}
+.sample-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sample-card{padding:7px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2);text-align:left;cursor:pointer;color:var(--ink);transition:border-color .15s}
+.sample-card:hover{border-color:var(--line-2)}
+.sample-thumb{display:grid;place-items:center;height:62px;border-radius:8px;overflow:hidden;background:var(--bg-4);color:var(--mut-2)}
+.sample-thumb img{width:100%;height:100%;object-fit:cover}
+.sample-thumb svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6}
+.sample-title{display:block;margin-top:8px;font-size:11.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sample-sub{display:block;margin-top:2px;font-family:var(--mono);font-size:8.5px;color:var(--mut-2)}
+.side-stack{display:grid;gap:26px}
+.side-block h3{margin:0;font-size:15px;font-weight:750}
+.side-block>p{margin:6px 0 0;font-size:12px;line-height:1.65;color:var(--mut)}
+.cfg-label{display:block;margin:15px 0 6px;font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.check{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13px;color:var(--ink-2);cursor:pointer}
+.check input{width:14px;height:14px;accent-color:var(--lime)}
+.range-row{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--ink-2);margin-top:16px}
+.range-row output{font-family:var(--mono);color:var(--lime)}
+input[type=range]{width:100%;margin:9px 0 2px;accent-color:var(--lime)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.seg button{min-height:34px;border:1px solid var(--line-2);border-radius:9px;background:transparent;color:var(--ink-2);font-size:12px;font-weight:600;cursor:pointer}
+.seg button.on{border-color:var(--lime);color:var(--lime)}
+.soon-badge{display:inline-block;margin-left:8px;padding:2px 7px;border:1px solid var(--line-2);border-radius:999px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--mut-2);vertical-align:2px}
+.range-row.is-planned{color:var(--mut-2)}
+.range-row.is-planned output{color:var(--mut-2)}
+.range-row.is-planned .soon-badge{margin-left:auto}
+.range-row.is-planned output{margin-left:10px}
+input[type=range]:disabled{accent-color:var(--mut-2);opacity:.45;cursor:not-allowed}
+.seg.is-planned button:disabled{color:var(--mut-2);border-color:var(--line);background:var(--bg-3);opacity:.6;cursor:not-allowed}
+.seg.is-planned button.on:disabled{color:var(--mut);border-color:var(--line-2)}
+.cfg-help{margin:7px 0 0;font-size:11.5px;line-height:1.55;color:var(--mut-2)}
+.note-box{margin-top:15px;padding:12px 13px;border-radius:10px;border:1px solid color-mix(in srgb,var(--warn) 35%,var(--line));background:color-mix(in srgb,var(--warn) 5%,transparent);color:var(--mut);font-size:11.5px;line-height:1.65}
+/* ---- Detection Scope: hand-drawn Coming Soon callouts ---- */
+:root{--cs-red:#ff6659;--cs-red-soft:rgba(255,102,89,.09)}
+html[data-theme="light"]{--cs-red:#d92d20;--cs-red-soft:rgba(217,45,32,.055)}
+.cs-row{display:flex;align-items:center;width:100%;max-width:100%;min-width:0;margin:6px 0 2px}
+.cs-group{position:relative;flex:1 1 auto;min-width:0;padding:9px 10px}
+.cs-group::before,.cs-group::after{content:"";position:absolute;pointer-events:none;border:1.4px solid var(--cs-red)}
+.cs-group::before{inset:0;border-radius:16px 20px 14px 19px/19px 14px 20px 15px;transform:rotate(-.18deg)}
+.cs-group::after{inset:1px -1px -1px 1px;border-color:color-mix(in srgb,var(--cs-red) 38%,transparent);border-radius:19px 14px 20px 13px/13px 19px 14px 20px;transform:rotate(.28deg)}
+.cs-group>*{position:relative;z-index:1}
+.cs-group .check{font-size:12px;line-height:1.4;padding:4px 0}
+.cs-group .check input{flex:0 0 auto}
+.cs-group .roadmap-badge{flex:0 0 auto;font-size:7px;padding:1px 5px}
+.cs-group .range-row{margin-top:0;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.cs-group .range-row label{flex:1 1 auto;min-width:0}
+.cs-group input[type=range]{margin:8px 0 1px}
+.cs-group .seg{margin-top:0}
+.cs-group .seg button{min-height:32px;font-size:11.5px;padding:0 6px}
+.cs-link{flex:0 0 12px;height:1.5px;margin:0 1px;background:var(--cs-red);border-radius:2px;transform:rotate(-2.5deg);opacity:.9}
+.cs-callout-wrap{display:flex;flex:0 0 auto;flex-direction:column;align-items:center;max-width:46%}
+.cs-sparks{display:block;width:32px;height:8px;margin-bottom:2px;overflow:visible}
+.cs-sparks path{fill:none;stroke:var(--cs-red);stroke-width:1.5;stroke-linecap:round;opacity:.85}
+.cs-callout{display:inline-block;padding:6px 8px 5px;border:1.4px solid var(--cs-red);border-radius:13px 16px 12px 15px/15px 12px 16px 13px;background:var(--cs-red-soft);color:var(--cs-red);font-family:var(--mono);font-size:8.5px;font-weight:800;letter-spacing:.09em;line-height:1.25;text-align:center;white-space:nowrap;transform:rotate(-1.1deg)}
+@media(max-width:480px){
+  .cs-row{flex-wrap:wrap}
+  .cs-group{flex:1 1 100%}
+  .cs-link{flex:0 0 auto;width:1.5px;height:11px;margin:1px 30px 1px auto;transform:rotate(1deg)}
+  .cs-callout-wrap{margin-left:auto;max-width:100%}
+}
+.steps{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:12px}
+.steps li{display:flex;gap:11px;font-size:12.5px;line-height:1.65;color:var(--mut)}
+.steps b{font-family:var(--mono);font-size:9px;display:grid;place-items:center;width:21px;height:21px;flex:0 0 auto;border-radius:50%;border:1px solid var(--line-2);color:var(--mut)}
+
+/* ================= results ================= */
+.result-block{display:none;margin-top:32px}
+.result-block.show{display:block;animation:resultin .35s ease both}
+@keyframes resultin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.assess{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:24px;border:1px solid var(--line);border-radius:16px;background:var(--bg-2);flex-wrap:wrap}
+.assess .a-value{margin-top:9px;font-size:clamp(26px,2.8vw,36px);font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.assess .a-value.good{color:var(--mint)} .assess .a-value.warn{color:var(--warn)}
+.assess-actions{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.assess-actions .row{display:flex;gap:8px;flex-wrap:wrap}
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}
+.stat-cell{border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2);padding:16px 18px}
+.stat-cell strong{display:block;font-size:30px;font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.stat-cell span{display:block;margin-top:7px;font-size:11px;line-height:1.5;color:var(--mut-2)}
+.sub-title{margin:26px 0 12px;font-size:17px;font-weight:750}
+.worker-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.worker{border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2);padding:17px}
+.worker-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.worker-top strong{font-size:13.5px}
+.worker p{margin:10px 0 0;font-size:12.5px;line-height:1.65;color:var(--mut)}
+.worker dl{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+.worker dt{font-size:9.5px;font-weight:700;letter-spacing:.1em;color:var(--mut-2);text-transform:uppercase}
+.worker dd{margin:2px 0 0;font-size:12.5px;color:var(--ink-2);font-weight:600}
+.worker .w-ico{display:grid;place-items:center;width:26px;height:26px;flex:0 0 auto;border-radius:50%;border:1px solid var(--line-2);font-size:11px;font-weight:800;color:var(--warn)}
+.worker.is-safe .w-ico{color:var(--mint);border-color:color-mix(in srgb,var(--mint) 50%,var(--line))}
+.worker.is-concern .w-ico{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 55%,var(--line))}
+.worker-id{display:flex;align-items:center;gap:9px;min-width:0}
+.evidence-fig{margin:16px 0 0;border-radius:14px;overflow:hidden;background:#04070a;border:1px solid var(--line)}
+.evidence-fig img{display:block;width:100%;max-height:440px;object-fit:contain}
+.evidence-fig figcaption{padding:10px 14px;background:var(--bg-2);font-family:var(--mono);font-size:9.5px;color:var(--mut-2)}
+.evidence-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2)}
+.evidence-bar .eb-txt{font-size:12.5px;color:var(--mut);line-height:1.65;flex:1;min-width:230px;margin:0}
+.evidence-bar .eb-txt strong{color:var(--ink)}
+.ts-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ts-chip{padding:6px 10px;border:1px solid var(--line-2);border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-2)}
+.ts-chip.flag{border-color:color-mix(in srgb,var(--warn) 55%,var(--line));color:var(--warn)}
+
+/* ================= library ================= */
+/* Toolbar rows get horizontal inset so controls never merge with the panel border. */
+.lib-tools{display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"search sort refresh";gap:12px;align-items:center;width:100%;min-width:0;padding:16px clamp(16px,2vw,24px) 12px}
+.lib-tools .search{grid-area:search;min-width:0;width:100%}
+.lib-tools .select{grid-area:sort;min-width:168px;max-width:100%}
+.lib-tools>.btn{grid-area:refresh;white-space:nowrap}
+.search{position:relative;min-width:0}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;fill:none;stroke:var(--mut-2);stroke-width:1.8}
+.search input{width:100%;min-height:40px;padding:0 12px 0 34px;border:1px solid var(--line-2);border-radius:10px;background:var(--bg-2);color:var(--ink);font-size:13px}
+.search input::placeholder{color:var(--mut-2)}
+.select{min-height:40px;padding:0 10px;border:1px solid var(--line-2);border-radius:10px;background:var(--bg-2);color:var(--ink);font-size:13px}
+.lib-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;min-width:0;padding:18px clamp(16px,2vw,24px) 2px}
+.lib-head strong{font-size:17px;font-weight:750}
+.lib-head span{font-family:var(--mono);font-size:9.5px;color:var(--mut-2);white-space:nowrap}
+.filters{display:flex;flex-wrap:wrap;gap:8px;min-width:0;padding:8px clamp(16px,2vw,24px) 14px}
+.fpill{flex:0 0 auto;min-height:32px;padding:0 12px;border:1px solid var(--line-2);border-radius:999px;background:transparent;color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap}
+.fpill:hover{color:var(--ink)}
+.fpill.on{border-color:var(--lime);color:var(--lime)}
+.bulk{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;min-width:0;padding:12px clamp(16px,2vw,24px);border-top:1px solid var(--line);font-size:12px;color:var(--mut)}
+.bulk label{display:flex;align-items:center;gap:7px;cursor:pointer;flex:0 1 auto;white-space:nowrap}
+.bulk-r{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;margin-left:auto;font-family:var(--mono);font-size:9.5px}
+.bulk-r span{white-space:nowrap}
+#view-reports .panel{min-width:0}
+#view-reports .table-scroll{max-width:100%}
+
+/* ================= detail ================= */
+.detail-id{padding:28px 0 20px}
+.detail-id h2{margin:10px 0 0;font-size:clamp(27px,3vw,38px);font-weight:800;letter-spacing:-.03em;line-height:1.1;overflow-wrap:anywhere}
+.detail-id p{margin:9px 0 0;font-family:var(--mono);font-size:10px;color:var(--mut-2)}
+.detail-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:clamp(22px,3vw,40px);align-items:start;margin-top:6px}
+.stage{position:relative;display:grid;place-items:center;min-height:320px;border-radius:14px;background:#04070a;overflow:hidden}
+.stage::before,.stage::after{content:"";position:absolute;width:22px;height:22px;z-index:2;pointer-events:none}
+.stage::before{top:12px;left:12px;border-top:1.5px solid rgba(245,247,250,.75);border-left:1.5px solid rgba(245,247,250,.75)}
+.stage::after{bottom:12px;right:12px;border-bottom:1.5px solid rgba(245,247,250,.75);border-right:1.5px solid rgba(245,247,250,.75)}
+.stage img,.stage video{position:relative;z-index:1;display:block;width:100%;max-height:540px;object-fit:contain}
+.stage .ph{padding:40px;text-align:center;color:#8fa1b5;font-size:13px;line-height:1.65;max-width:44ch}
+.stage-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.stage-bar span{font-size:11.5px;color:var(--mut);line-height:1.6}
+.timeline{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tchip{padding:7px 11px;border:1px solid var(--line-2);border-radius:999px;background:transparent;color:var(--ink-2);font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer}
+.tchip.flag{border-color:color-mix(in srgb,var(--warn) 55%,var(--line));color:var(--warn)}
+.tchip.on{border-color:var(--lime);color:var(--lime)}
+.frame-focus{display:none;margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2);padding:10px}
+.frame-focus.show{display:block}
+.frame-focus img{display:block;width:100%;max-height:260px;object-fit:contain;border-radius:8px;background:#04070a}
+.frame-focus p{margin:8px 0 0;font-family:var(--mono);font-size:10px;color:var(--mut);line-height:1.6}
+#frameStrip .detail-frame-safe .sample-thumb{outline:2px solid var(--mint);outline-offset:-2px}
+#frameStrip .detail-frame-uncertain{border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+#frameStrip .detail-frame-uncertain .sample-thumb{outline:2px dashed var(--warn);outline-offset:-2px}
+.frame-focus.detail-frame-uncertain img{outline:2px dashed var(--warn);outline-offset:-2px}
+.frame-focus.detail-frame-safe img{outline:2px solid var(--mint);outline-offset:-2px}
+.demo-expl{display:block;margin-top:6px;font-size:11px;font-weight:650;color:var(--warn)}
+.review-panel{position:sticky;top:20px;border:1px solid var(--line);border-radius:16px;background:var(--bg-2);padding:20px;box-shadow:var(--shadow)}
+.rp-head{display:flex;align-items:center;justify-content:space-between;gap:9px;padding-bottom:13px;border-bottom:1px solid var(--line)}
+.rp-head strong{font-size:15px;font-weight:750}
+.review-panel>p{font-size:12.5px;line-height:1.65;color:var(--mut)}
+.rp-actions{display:grid;gap:8px;margin-top:14px}
+.rp-actions .btn{width:100%}
+.rp-actions .btn.on{box-shadow:inset 0 0 0 2px currentColor;font-weight:750}
+.demo-action-label{margin:12px 0 0;padding:9px 11px;border:1px dashed color-mix(in srgb,var(--warn) 55%,var(--line));border-radius:9px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--warn);line-height:1.6}
+.demo-note-echo{margin:10px 0 0;font-size:12px;line-height:1.6;color:var(--mut);overflow-wrap:anywhere}
+textarea.note{width:100%;min-height:82px;margin-top:6px;padding:11px;border:1px solid var(--line-2);border-radius:10px;background:var(--bg-3);color:var(--ink);font-size:13px;line-height:1.6;resize:vertical}
+.meta-list{font-size:12.5px;line-height:2;color:var(--mut)}
+.meta-list b{color:var(--mut-2);font-weight:650;font-family:var(--mono);font-size:9.5px}
+.foot-note{margin:44px 0 0;padding-top:18px;border-top:1px solid var(--line);font-size:11px;color:var(--mut-2);text-align:center;line-height:1.7}
+
+/* Evidence Library toolbar: search takes its own row below desktop, sort/refresh stay right. */
+@media(max-width:1199px){
+  .lib-tools{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"search search search" ". sort refresh"}
+}
+@media(max-width:767px){
+  .lib-tools{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"search search" "sort refresh";gap:10px;padding-top:14px;padding-bottom:10px}
+  .lib-tools .select{min-width:150px;width:100%}
+  .filters{padding-bottom:12px}
+  .bulk{flex-direction:column;align-items:stretch;gap:10px}
+  .bulk-r{margin-left:0;justify-content:space-between;width:100%}
+  .lib-head{padding-top:16px}
+}
+@media(max-width:420px){
+  .lib-tools .select{min-width:0}
+  .bulk-r{flex-wrap:wrap}
+}
+@media(max-width:1180px){
+  .hero{grid-template-columns:1fr;padding-top:32px}.featured{max-width:660px}
+  .band{grid-template-columns:1fr 1fr}
+  .grid-launch{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr 300px}.tool-grid{grid-template-columns:1fr 280px}
+}
+@media(max-width:920px){
+  .sidebar{position:sticky;top:0;width:100%;flex-direction:row;align-items:center;flex-wrap:wrap;padding:10px 14px;gap:4px 14px}
+  .brand{border:0;padding:2px 4px}.brand-tag,.side-foot,.side-ver,.nav-label{display:none}
+  .nav{display:flex;margin:0 0 0 auto;overflow-x:auto}
+  .nav-link{padding:8px 10px;font-size:12.5px;white-space:nowrap}
+  .nav-link svg{display:none}
+  .main{margin:0}.wrap{padding:0 18px 44px}
+  .tool-grid,.detail-grid{grid-template-columns:1fr}.review-panel{position:static}
+  .ev-stats{display:none}
+}
+@media(max-width:640px){
+  .hero h1{font-size:36px}
+  .band{grid-template-columns:1fr 1fr}
+  .stat-strip{grid-template-columns:1fr 1fr}
+  .worker-grid{grid-template-columns:1fr}
+  .facts{grid-template-columns:1fr 1fr;gap:10px 0}
+  .assess-actions{align-items:flex-start}.stage{min-height:210px}
+  .sample-grid{grid-template-columns:repeat(3,1fr)}.sample-thumb{height:46px}
+  .topbar{flex-wrap:wrap}.dropzone{min-height:220px}.dropzone strong{font-size:21px}
+  .ev-thumb{width:96px;height:62px}
+  .action-bar{flex-direction:column;align-items:stretch}.action-meta{min-width:0}
+  .pipeline{gap:4px}.pipe-arrow{display:none}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+@media print{.sidebar,.topbar,.review-panel .rp-actions,.foot-note{display:none!important}body{background:#fff;color:#111}.main{margin:0}.wrap{padding:0}.view{display:none!important}#view-detail{display:block!important}}
+</style>
+</head>
+<body>
+<!-- ================= WELCOME (entry screen, chrome-free) ================= -->
+<section class="view welcome" id="view-welcome" data-view="welcome" hidden aria-label="Welcome">
+  <div class="welcome-inner">
+    <header class="welcome-top">
+      <a class="w-brand" href="/" data-route="/" aria-label="SOPProof welcome">
+        <span class="w-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M15 26v-2.2A9.2 9.2 0 0 1 21.5 15V26h5V15a9.2 9.2 0 0 1 6.5 8.8V26" fill="#fff"/><rect x="8" y="26" width="32" height="4.6" rx="2.3" fill="#fff"/><rect x="13" y="33.4" width="22" height="3" rx="1.5" fill="#fff" opacity=".72"/></svg></span>
+        <span class="w-brand-text"><span class="w-word"><span class="w-accent">SOP</span>Proof</span><span class="w-tag">AI-Powered Workplace Safety Intelligence</span></span>
+      </a>
+      <button class="btn small w-theme" type="button" id="themeToggleWelcome" aria-label="Switch colour theme"></button>
+    </header>
+
+    <div class="welcome-hero">
+      <div class="welcome-copy">
+        <span class="w-eyebrow">AI-Powered Workplace Safety Intelligence</span>
+        <h1><span class="w-h1-top">Welcome to</span><span class="w-h1-brand"><span class="w-accent">SOP</span>Proof</span></h1>
+        <p class="welcome-lede"><strong>AI-powered workplace safety inspections</strong> with evidence-backed verification. Capture a photo or video, let AI assist the review, and keep the final decision with a human.</p>
+        <div class="w-cta-row">
+          <button class="btn welcome-cta" type="button" data-go="/overview">Get Started <span aria-hidden="true">→</span></button>
+          <span class="w-cta-note">Opens the inspection workspace. No sign-in required.</span>
+        </div>
+        <p class="welcome-note">Prototype system — AI findings always require human verification.</p>
+      </div>
+
+      <figure class="w-visual" aria-label="Illustrative preview photo: three construction workers wearing orange hard hats and high-visibility vests in front of scaffolding. Illustrative photo only — not an inspection result, and the overlay is not SAM output.">
+        <img class="hero-photo" src="/hero-photo.jpg" alt="Three construction workers wearing orange hard hats and high-visibility vests in front of scaffolding" width="678" height="452">
+        <span class="w-visual-tag"><i></i>ILLUSTRATIVE PREVIEW</span>
+        <span class="w-detect"><i></i><span>Computer-vision review<small>ILLUSTRATIVE OVERLAY — NOT SAM OUTPUT</small></span></span>
+        <span class="w-review"><strong>Safety Review</strong><span>Human verification required before any finding is confirmed.</span></span>
+        <span class="w-visual-foot">NOT AN INSPECTION RESULT</span>
+      </figure>
+    </div>
+
+    <ol class="w-flow" aria-label="How SOPProof works">
+      <li><b>01</b><span><strong>Capture</strong><small>Photo or Video</small></span><span class="w-flow-arrow" aria-hidden="true">→</span></li>
+      <li><b>02</b><span><strong>Detect</strong><small>AI Analysis</small></span><span class="w-flow-arrow" aria-hidden="true">→</span></li>
+      <li><b>03</b><span><strong>Review</strong><small>Visual Review</small></span><span class="w-flow-arrow" aria-hidden="true">→</span></li>
+      <li><b>04</b><span><strong>Verify</strong><small>Human Verification</small></span></li>
+    </ol>
+    <p class="welcome-support"><b>Capture • Detect • Review • Verify</b> &nbsp;—&nbsp; AI-assisted inspection with evidence-backed human verification.</p>
+    <p class="welcome-foot">SOPProof • AI-Powered Workplace Safety Intelligence</p>
+  </div>
+</section>
+<section class="view welcome" id="view-login" data-view="login" hidden aria-label="Sign in">
+  <div class="welcome-inner">
+    <header class="welcome-top">
+      <a class="w-brand" href="/" data-route="/" aria-label="SOPProof welcome">
+        <span class="w-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M15 26v-2.2A9.2 9.2 0 0 1 21.5 15V26h5V15a9.2 9.2 0 0 1 6.5 8.8V26" fill="#fff"/><rect x="8" y="26" width="32" height="4.6" rx="2.3" fill="#fff"/><rect x="13" y="33.4" width="22" height="3" rx="1.5" fill="#fff" opacity=".72"/></svg></span>
+        <span class="w-brand-text"><span class="w-word"><span class="w-accent">SOP</span>Proof</span><span class="w-tag">AI-Powered Workplace Safety Intelligence</span></span>
+      </a>
+      <button class="btn small w-theme" type="button" id="themeToggleLogin" aria-label="Switch colour theme"></button>
+    </header>
+    <div class="welcome-center" style="flex:1;display:grid;place-items:center;padding:24px 0">
+      <div class="auth-card">
+        <h1>Sign in</h1>
+        <p class="auth-sub">Sign in to your SOPProof workspace. Your inspections and reports are private to your account.</p>
+        <form class="auth-form" id="loginForm" novalidate>
+          <div class="auth-err" id="loginErr" role="alert"></div>
+          <div class="auth-field"><label for="loginEmail">Email</label><input class="auth-input" id="loginEmail" type="email" autocomplete="email" required></div>
+          <div class="auth-field"><label for="loginPassword">Password</label><input class="auth-input" id="loginPassword" type="password" autocomplete="current-password" required></div>
+          <button class="btn primary auth-submit" type="submit">Sign in →</button>
+        </form>
+        <div class="auth-or" aria-hidden="true"><span>OR</span></div>
+        <button class="btn guest-btn" type="button" id="guestBtn">Explore as Guest <span aria-hidden="true">→</span></button>
+        <p class="guest-note">Explore a read-only demonstration of SOPProof. No account required.</p>
+        <p class="auth-alt">Have an invitation? <button type="button" data-go="/register">Create your account</button></p>
+      </div>
+    </div>
+    <p class="welcome-foot">SOPProof • AI-Powered Workplace Safety Intelligence</p>
+  </div>
+</section>
+<section class="view welcome" id="view-register" data-view="register" hidden aria-label="Create account">
+  <div class="welcome-inner">
+    <header class="welcome-top">
+      <a class="w-brand" href="/" data-route="/" aria-label="SOPProof welcome">
+        <span class="w-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M15 26v-2.2A9.2 9.2 0 0 1 21.5 15V26h5V15a9.2 9.2 0 0 1 6.5 8.8V26" fill="#fff"/><rect x="8" y="26" width="32" height="4.6" rx="2.3" fill="#fff"/><rect x="13" y="33.4" width="22" height="3" rx="1.5" fill="#fff" opacity=".72"/></svg></span>
+        <span class="w-brand-text"><span class="w-word"><span class="w-accent">SOP</span>Proof</span><span class="w-tag">AI-Powered Workplace Safety Intelligence</span></span>
+      </a>
+      <button class="btn small w-theme" type="button" id="themeToggleRegister" aria-label="Switch colour theme"></button>
+    </header>
+    <div class="welcome-center" style="flex:1;display:grid;place-items:center;padding:24px 0">
+      <div class="auth-card">
+        <h1>Create your account</h1>
+        <p class="auth-sub">Registration is invite-only. Enter the invitation code from your administrator.</p>
+        <form class="auth-form" id="registerForm" novalidate>
+          <div class="auth-err" id="registerErr" role="alert"></div>
+          <div class="auth-field"><label for="registerInvite">Invitation code</label><input class="auth-input" id="registerInvite" type="text" autocomplete="off" required></div>
+          <div class="auth-field"><label for="registerEmail">Email</label><input class="auth-input" id="registerEmail" type="email" autocomplete="email" required></div>
+          <div class="auth-field"><label for="registerPassword">Password (min. 12 characters)</label><input class="auth-input" id="registerPassword" type="password" autocomplete="new-password" required minlength="12"></div>
+          <button class="btn primary auth-submit" type="submit">Create account →</button>
+        </form>
+        <p class="auth-alt">Already registered? <button type="button" data-go="/login">Sign in</button></p>
+      </div>
+    </div>
+    <p class="welcome-foot">SOPProof • AI-Powered Workplace Safety Intelligence</p>
+  </div>
+</section>
+<aside class="sidebar" id="appSidebar">
+  <a class="brand" href="/overview" data-route="/overview" aria-label="SOPProof overview">
+    <span class="brand-word"><span class="w-mark brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M15 26v-2.2A9.2 9.2 0 0 1 21.5 15V26h5V15a9.2 9.2 0 0 1 6.5 8.8V26" fill="#fff"/><rect x="8" y="26" width="32" height="4.6" rx="2.3" fill="#fff"/><rect x="13" y="33.4" width="22" height="3" rx="1.5" fill="#fff" opacity=".72"/></svg></span><span><span class="brand-accent">SOP</span>Proof</span></span>
+    <span class="brand-tag">AI-Powered Workplace<br>Safety Intelligence</span>
+  </a>
+  <div class="sys-line" aria-hidden="true"><span class="sys-dot"></span><span>VISION SYSTEM</span></div>
+  <nav class="nav" aria-label="Main navigation">
+    <p class="nav-label">Workspace</p>
+    <a class="nav-link" href="/overview" data-route="/overview"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/></svg>Overview</a>
+    <a class="nav-link" href="/photo" data-route="/photo"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14"/><circle cx="12" cy="12" r="3.2"/><path d="M7 5l1.2-2h7.6L17 5"/></svg>Photo inspection</a>
+    <a class="nav-link" href="/video" data-route="/video"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12"/><path d="M16 10l5-3v10l-5-3"/></svg>Video inspection</a>
+    <p class="nav-label">Management</p>
+    <a class="nav-link" href="/reports" data-route="/reports"><svg viewBox="0 0 24 24"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"/><path d="M14 3.5v5h5M9 13h6M9 16.5h6"/></svg>Inspection reports</a>
+  </nav>
+  <div class="side-foot"><strong id="sysLine">VISION SYSTEM · ONLINE</strong><ul class="sys-list"><li id="sysSam">SAM 3.1 Detection</li><li id="sysClaude">Muse Spark Visual Review</li><li class="sys-ok">Human Verification</li></ul></div>
+  <div class="side-user" id="userBox" hidden><span id="userEmail"></span><button class="btn small ghost" type="button" id="logoutBtn">Log out</button></div>
+  <p class="side-ver">Prototype — findings require human review</p>
+</aside>
+
+<main class="main" id="appMain"><div class="wrap">
+  <header class="topbar">
+    <div class="top-path" id="pageCrumb">SOPPROOF <b>/</b> OPERATIONS</div>
+    <div class="top-actions">
+      <span class="status-chip" id="apiStatus"><i></i><span id="apiStatusText">CHECKING API</span></span>
+      <button class="btn small" type="button" id="themeToggle" aria-label="Switch colour theme"></button>
+    </div>
+  </header>
+  <span class="sr-only"><span id="pageTitle">Safety overview</span><span id="pageSub"></span></span>
+
+  <!-- ================= OVERVIEW ================= -->
+  <section class="view" id="view-overview" data-view="overview" hidden>
+    <div class="demo-banner" data-guest-only hidden><span class="badge lime">Guest Demo</span><p style="margin:0"><strong>You are exploring the guest demo.</strong> Demo data is clearly labelled, and this session includes 2 live AI inspections — open Photo or Video inspection to use them. <button class="link-btn" type="button" data-exit-demo>Exit demo &amp; sign in</button></p></div>
+    <div class="hero">
+      <div class="hero-copy">
+        <span class="label">AI-powered workplace safety intelligence</span>
+        <h1><span>Workplace safety,</span><span class="dim">continuously verified.</span></h1>
+        <p class="hero-lede"><strong>Computer vision + AI visual review for PPE evidence.</strong> SOPProof detects workers and hard hats in photos and workplace footage, reviews the original evidence, and routes every potential issue to a human. No verdict without proof.</p>
+        <div class="hero-cta">
+          <button class="btn primary" type="button" data-go="/photo">Inspect photo</button>
+          <button class="btn" type="button" data-go="/video">Inspect video</button>
+        </div>
+        <p class="hero-note">Prototype system — AI findings always require human verification.</p>
+      </div>
+      <article class="featured" id="featuredCard">
+        <div class="featured-media" id="featuredMedia"><span>NO INSPECTION EVIDENCE YET</span></div>
+        <div class="featured-body">
+          <div style="min-width:0">
+            <span class="label">Latest evidence</span>
+            <h3 id="featuredTitle">No reports yet</h3>
+            <p class="featured-meta" id="featuredMeta">Run a photo or video inspection and the newest evidence will appear here.</p>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:9px;flex:0 0 auto"><span id="featuredBadge"><span class="badge info">Awaiting first inspection</span></span><button class="btn primary small" type="button" id="featuredOpen" disabled>Open report</button></div>
+        </div>
+      </article>
+    </div>
+
+    <div class="pipeline" role="list" aria-label="Inspection workflow">
+      <div class="pipe-step" role="listitem"><b>01</b><span>Capture</span><small>workplace evidence</small></div><span class="pipe-arrow">→</span>
+      <div class="pipe-step" role="listitem"><b>02</b><span>Detect</span><small>workers + PPE</small></div><span class="pipe-arrow">→</span>
+      <div class="pipe-step" role="listitem"><b>03</b><span>Review</span><small>visual AI evidence check</small></div><span class="pipe-arrow">→</span>
+      <div class="pipe-step" role="listitem"><b>04</b><span>Verify</span><small>human decision</small></div>
+    </div>
+
+    <div class="band" aria-label="Inspection metrics">
+      <div class="band-cell"><span class="label">Inspections</span><span class="num" id="kpiTotal">—</span><p><b id="kpiTrend">Loading history</b><br>photo + video inspections run</p></div>
+      <div class="band-cell"><span class="label">Potential issues</span><span class="num amber" id="kpiFlagged">—</span><p>Concern observations flagged across saved evidence — each one starts human verification.</p></div>
+      <div class="band-cell"><span class="label">Reports generated</span><span class="num" id="kpiReports">—</span><p>HTML evidence reports saved and available in the archive.</p></div>
+      <div class="band-cell"><span class="label">Human reviews</span><span class="num" id="kpiPending">—</span><p>Reports still awaiting a reviewer decision in this browser.</p></div>
+    </div>
+    <div class="ppe-strip"><span class="label">PPE visibility</span><strong id="kpiCompliance">—</strong><div class="meter"><i id="kpiComplianceBar"></i></div><span>Worker observations marked helmet-visible. An observed rate only — not a site-wide compliance claim.</span></div>
+
+    <div class="sect">
+      <div class="sect-head"><div><h2>Start an inspection</h2><p>Drop evidence for a fast start, or open the full workspace.</p></div></div>
+      <div class="grid-launch">
+        <article class="launch-cell">
+          <div class="launch-kicker"><span class="launch-ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14"/><circle cx="12" cy="12" r="3"/><path d="M7 5l1.2-2h7.6L17 5"/></svg></span><span class="badge info">JPG · PNG · WEBP · ≤15 MB</span></div>
+          <h3>Photo inspection</h3><p>Upload a workplace photo and inspect PPE compliance, worker by worker.</p>
+          <div class="launch-actions"><button class="btn primary small" type="button" data-go="/photo">Start photo inspection</button><label class="file-chip" for="overviewPhotoInput">or choose an image<input class="hidden-input" id="overviewPhotoInput" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"></label></div>
+          <div class="drop-strip" data-quick-drop="photo">DROP IMAGE TO START</div>
+        </article>
+        <article class="launch-cell">
+          <div class="launch-kicker"><span class="launch-ico"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12"/><path d="M16 10l5-3v10l-5-3"/></svg></span><span class="badge info">MP4 · ≤100 MB</span></div>
+          <h3>Video inspection</h3><p>Review sampled moments from workplace footage in a timestamped report.</p>
+          <div class="launch-actions"><button class="btn primary small" type="button" data-go="/video">Start video inspection</button><label class="file-chip" for="overviewVideoInput">or choose an MP4<input class="hidden-input" id="overviewVideoInput" type="file" accept="video/mp4,.mp4"></label></div>
+          <div class="drop-strip" data-quick-drop="video">DROP MP4 TO START</div>
+        </article>
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="sect-head"><div><h2>Priority findings</h2><p>Newest reports containing potential PPE concerns.</p></div><button class="link-btn" type="button" data-go="/reports">All reports</button></div>
+      <div id="flagFeed"><div class="skeleton"></div><div class="skeleton"></div></div>
+    </div>
+
+    <div class="sect">
+      <div class="sect-head"><div><h2>Recent evidence</h2><p>Latest inspections, newest first.</p></div><span class="mono" id="overviewCount" style="font-size:9.5px;letter-spacing:.08em;color:var(--mut-2)">LOADING…</span></div>
+      <div class="ev-list" id="overviewRecent"><div class="empty"><strong>No inspections yet</strong>Run your first photo or video inspection to build the evidence record.</div></div>
+    </div>
+  </section>
+
+  <!-- ================= PHOTO ================= -->
+  <section class="view" id="view-photo" data-view="photo" hidden>
+    <div class="demo-banner" data-guest-only hidden style="margin:0 0 20px"><span class="badge lime">Guest Demo</span><p style="margin:0"><strong>Guest mode.</strong> You can run 2 live AI inspections in this session, or replay precomputed demo results for free. <button class="link-btn" type="button" data-exit-demo>Exit demo &amp; sign in</button> for unlimited inspections.</p></div>
+    <div class="guest-allowance" data-guest-only hidden>
+      <div class="ga-main"><span class="label">Guest inspections</span><strong id="photoAllowanceText">— of 2 inspections remaining</strong></div>
+      <p class="ga-note">LIVE AI INSPECTION — consumes 1 guest credit · PRECOMPUTED DEMO REPLAY — does not consume a credit. Credits are not refunded if the AI pipeline fails after an inspection is accepted.</p>
+      <div class="guest-limit" id="photoGuestLimit" hidden><strong>Demo inspection limit reached</strong><p>You've used both inspections available in this guest session. Sign in to continue inspecting workplace evidence.</p><button class="btn primary small" type="button" data-guest-signin>Sign in</button></div>
+    </div>
+    <div class="page-head" style="padding-top:0">
+      <span class="label">Photo inspection</span>
+      <h2>Visual PPE verification<br>from a single image.</h2>
+      <p>Submit one workplace image. Workers and hard hats are detected, the original image is reviewed worker by worker, and every concern goes to a human.</p>
+    </div>
+    <div class="tool-grid">
+      <div>
+        <div class="rail" aria-label="Photo workflow">
+          <div><b>01</b><span>Ingest</span><small>One workplace image</small></div>
+          <div><b>02</b><span>Detect</span><small>People + hard hats</small></div>
+          <div><b>03</b><span>Review</span><small>Visual evidence check</small></div>
+          <div><b>04</b><span>Verify</span><small>Human sign-off</small></div>
+        </div>
+        <section class="panel ingest">
+          <div class="panel-head"><div><h3>Evidence ingestion</h3><p>JPG, PNG or WEBP · maximum 15 MB · heads visible gives the most reliable result.</p></div><span class="badge lime">Photo</span></div>
+          <label class="dropzone" id="photoDropzone" for="photoInput">
+            <span class="dz-ico" style="display:none"></span>
+            <span class="dz-icon"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15.5V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3.5"/></svg></span>
+            <span class="dz-kicker">Evidence ingestion</span>
+            <strong>Drop workplace image</strong>
+            <small>or click to select an image from this device</small>
+            <input class="hidden-input" id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
+          </label>
+          <div class="guest-sample" data-guest-only hidden>
+            <span><strong>Guest sample</strong> · pre-computed, no upload</span>
+            <button class="btn small" type="button" data-guest-sample="photo">Or test with a pre-loaded sample</button>
+          </div>
+          <div class="demo-replay" id="photoDemoReplay" hidden role="status" aria-live="polite">
+            <div class="demo-replay-head"><span class="badge lime">DEMO REPLAY</span><span>PRE-COMPUTED DEMO · NO LIVE INSPECTION · NO UPLOAD SENT</span></div>
+            <div class="stage-track"><ol class="stages" id="photoDemoSteps">
+              <li data-stage><span class="n">01</span><span class="st-name">Ingest</span><span class="st-desc">Pre-loaded synthetic sample</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">02</span><span class="st-name">Detect</span><span class="st-desc">Pre-computed demo result</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">03</span><span class="st-name">Review</span><span class="st-desc">Pre-computed demo result</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">04</span><span class="st-name">Verify</span><span class="st-desc">Open the demo report</span><span class="st-state">QUEUED</span></li>
+            </ol></div>
+            <p class="proc-note">This is a replay of pre-computed synthetic results. No file was uploaded, and SAM 3.1 / Muse Spark were not run.</p>
+            <a class="btn primary small" id="photoDemoOpen" href="/outputs/de0000000001_report.html" target="_blank" rel="noopener" hidden>Open pre-computed demo report</a>
+          </div>
+          <div class="selected" id="photoSelected">
+            <div class="sel-frame" id="photoFrame"><span class="scan-chip"><i></i>ANALYZING EVIDENCE</span><img id="photoPreview" alt="Selected workplace image"></div>
+            <div class="sel-meta"><div style="min-width:0"><strong id="photoFileName"></strong><span id="photoFileMeta"></span></div><button class="btn ghost small" type="button" id="clearPhoto" style="color:var(--crit)">Remove ✕</button></div>
+            <dl class="facts">
+              <div><dt>File type</dt><dd id="photoFactType">—</dd></div>
+              <div><dt>File size</dt><dd id="photoFactSize">—</dd></div>
+              <div><dt>Dimensions</dt><dd id="photoFactDims">—</dd></div>
+              <div><dt>Evidence status</dt><dd class="ready" id="photoFactStatus">READY</dd></div>
+            </dl>
+          </div>
+          <div class="action-bar idle" id="photoActionBar">
+            <button class="btn primary" type="button" id="runPhoto" disabled>Run safety inspection →</button>
+            <div class="action-meta"><b id="photoHint">AWAITING IMAGE</b><span>One image · workers + hard hats · human review on findings</span></div>
+          </div>
+          <div class="processing" id="photoProcessing" role="status" aria-live="polite">
+            <div class="proc-top"><span class="spinner"></span><span class="proc-title">Processing evidence</span><span class="proc-sub">ELAPSED <span class="elapsed" data-elapsed>0:00</span><br>STAGES SHOWN — NOT LIVE PROGRESS</span></div>
+            <div class="stage-track"><ol class="stages" id="photoStages">
+              <li data-stage><span class="n">01</span><span class="st-name">Ingest</span><span class="st-desc">Image received and validated</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">02</span><span class="st-name">Detect workers + PPE</span><span class="st-desc">SAM 3.1 · people &amp; hard hats</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">03</span><span class="st-name">AI visual review</span><span class="st-desc">Muse Spark checks each worker</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">04</span><span class="st-name">Human verification</span><span class="st-desc">Safety officer decides — after results</span><span class="st-state">AFTER RESULTS</span></li>
+            </ol></div>
+            <p class="proc-note">The inspection service returns a single result when analysis completes and does not stream live progress. The highlighted stage advances on a timer to show the pipeline order — it is not a percentage and not backend telemetry. Keep this page open.</p>
+          </div>
+          <div class="alert err" id="photoError" role="alert"></div>
+          <div class="alert ok" id="photoDone"><strong>Inspection complete.</strong><p id="photoDoneText"></p><a class="link-btn" id="photoDoneReport" href="#" target="_blank" rel="noopener">Open generated report</a> &nbsp;·&nbsp; <button class="link-btn" type="button" id="photoDoneDetail">Review in SOPProof</button></div>
+          <div class="samples"><div class="samples-head"><strong>Reuse saved evidence</strong><span>FROM REPORT HISTORY</span></div><div class="sample-grid" id="photoSamples"><div class="empty" style="grid-column:1/-1"><strong>Loading</strong>Checking saved media…</div></div></div>
+        </section>
+
+        <section class="result-block" id="photoResults">
+          <div class="sect-head" style="margin-top:26px"><div><h2>Inspection result</h2><p>Assessment returned for this image. AI findings support — never replace — human judgement.</p></div></div>
+          <div class="assess" id="photoAssess">
+            <div><span class="label">Overall assessment</span><div class="a-value" id="photoOverall">—</div></div>
+            <div class="assess-actions"><span class="badge warn" id="photoReviewBadge">Human review required</span><span class="row"><a class="btn primary small" id="photoReportLink" href="#" target="_blank" rel="noopener">Open full report</a><button class="btn small" type="button" id="photoResultDetail">Review in workspace</button></span></div>
+          </div>
+          <div class="stat-strip four">
+            <div class="stat-cell"><strong id="photoPeople">—</strong><span>Workers detected</span></div>
+            <div class="stat-cell"><strong id="photoSafe">—</strong><span>PPE observations — helmet visible</span></div>
+            <div class="stat-cell"><strong id="photoConcerns">—</strong><span>Potential concerns</span></div>
+            <div class="stat-cell"><strong id="photoNeedsReview">—</strong><span>Uncertain — needs closer review</span></div>
+          </div>
+          <h3 class="sub-title">Worker evidence</h3>
+          <div class="worker-grid" id="photoWorkers"></div>
+          <figure class="evidence-fig"><img id="photoResultImage" alt="Inspected workplace image"><figcaption id="photoResultCaption">SOURCE IMAGE — AS SUBMITTED</figcaption></figure>
+        </section>
+      </div>
+      <div class="side-stack">
+        <section class="side-block">
+          <h3>Detection scope</h3><p>Interface preferences, saved in this browser.</p>
+          <span class="cfg-label">Target classes</span>
+          <label class="check"><input type="checkbox" data-pref-class="helmets" checked> Hard hats / helmets</label>
+          <div class="cs-row">
+            <div class="cs-group">
+              <label class="check is-disabled"><input type="checkbox" data-pref-class="vests" disabled> High-visibility vests <span class="roadmap-badge">ROADMAP</span></label>
+              <label class="check is-disabled"><input type="checkbox" data-pref-class="harness" disabled> Fall harness <span class="roadmap-badge">ROADMAP</span></label>
+              <label class="check is-disabled"><input type="checkbox" data-pref-class="zones" disabled> Restricted-zone entry <span class="roadmap-badge">ROADMAP</span></label>
+            </div>
+            <span class="cs-link" aria-hidden="true"></span>
+            <span class="cs-callout-wrap"><svg class="cs-sparks" viewBox="0 0 40 10" aria-hidden="true" focusable="false"><path d="M6 9c1.5-2.3 3-4.6 4.2-6.8M20 8.5V1.8M34 9c-1.4-2.3-2.9-4.6-4.1-6.7"/></svg><span class="cs-callout">COMING SOON</span></span>
+          </div>
+          <div class="cs-row">
+            <div class="cs-group">
+              <div class="range-row is-planned"><label for="confidenceRange">Confidence threshold</label><span class="soon-badge">NOT APPLIED</span><output id="confidenceValue">70%</output></div>
+              <input id="confidenceRange" type="range" min="30" max="95" step="5" value="70" disabled aria-describedby="confidenceHelp">
+            </div>
+            <span class="cs-link" aria-hidden="true"></span>
+            <span class="cs-callout-wrap"><svg class="cs-sparks" viewBox="0 0 40 10" aria-hidden="true" focusable="false"><path d="M6 9c1.5-2.3 3-4.6 4.2-6.8M20 8.5V1.8M34 9c-1.4-2.3-2.9-4.6-4.1-6.7"/></svg><span class="cs-callout">COMING SOON</span></span>
+          </div>
+          <p class="cfg-help" id="confidenceHelp">Display preference only. Does not affect inspection results yet.</p>
+          <span class="cfg-label">Review mode</span>
+          <div class="cs-row">
+            <div class="cs-group">
+              <div class="seg is-planned"><button type="button" class="on" data-review-mode="standard" disabled>Standard</button><button type="button" data-review-mode="strict" disabled>Strict</button></div>
+            </div>
+            <span class="cs-link" aria-hidden="true"></span>
+            <span class="cs-callout-wrap"><svg class="cs-sparks" viewBox="0 0 40 10" aria-hidden="true" focusable="false"><path d="M6 9c1.5-2.3 3-4.6 4.2-6.8M20 8.5V1.8M34 9c-1.4-2.3-2.9-4.6-4.1-6.7"/></svg><span class="cs-callout">COMING SOON</span></span>
+          </div>
+          <p class="cfg-help">Review-mode configuration is not yet connected to the inspection service.</p>
+          <div class="note-box">The current pipeline detects people and hard hats. Additional detection classes, confidence threshold, and review modes are coming soon.</div>
+        </section>
+        <section class="side-block">
+          <h3>How evidence is judged</h3>
+          <ol class="steps">
+            <li><b>01</b><span>SAM 3.1 proposes worker and hard-hat locations.</span></li>
+            <li><b>02</b><span>Muse Spark inspects the original pixels — a missing detection alone is never treated as a violation.</span></li>
+            <li><b>03</b><span>Concerns and uncertain cases are routed to a safety officer.</span></li>
+          </ol>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VIDEO ================= -->
+  <section class="view" id="view-video" data-view="video" hidden>
+    <div class="demo-banner" data-guest-only hidden style="margin:0 0 20px"><span class="badge lime">Guest Demo</span><p style="margin:0"><strong>Guest mode.</strong> You can run 2 live AI inspections in this session, or replay precomputed demo results for free. <button class="link-btn" type="button" data-exit-demo>Exit demo &amp; sign in</button> for unlimited inspections.</p></div>
+    <div class="guest-allowance" data-guest-only hidden>
+      <div class="ga-main"><span class="label">Guest inspections</span><strong id="videoAllowanceText">— of 2 inspections remaining</strong></div>
+      <p class="ga-note">LIVE AI INSPECTION — consumes 1 guest credit · PRECOMPUTED DEMO REPLAY — does not consume a credit. Credits are not refunded if the AI pipeline fails after an inspection is accepted.</p>
+      <div class="guest-limit" id="videoGuestLimit" hidden><strong>Demo inspection limit reached</strong><p>You've used both inspections available in this guest session. Sign in to continue inspecting workplace evidence.</p><button class="btn primary small" type="button" data-guest-signin>Sign in</button></div>
+    </div>
+    <div class="page-head" style="padding-top:0">
+      <span class="label">Video inspection</span>
+      <h2>Timestamped PPE evidence<br>from workplace footage.</h2>
+      <p>Submit an MP4. Workers and hard hats are tracked through the footage, selected frames receive visual review, and the result is a timestamped evidence report.</p>
+    </div>
+    <div class="tool-grid">
+      <div>
+        <div class="rail" aria-label="Video workflow">
+          <div><b>01</b><span>Ingest</span><small>Workplace MP4</small></div>
+          <div><b>02</b><span>Detect</span><small>Tracking + association</small></div>
+          <div><b>03</b><span>Review</span><small>Sampled-frame AI review</small></div>
+          <div><b>04</b><span>Report</span><small>Timestamped evidence</small></div>
+        </div>
+        <section class="panel ingest">
+          <div class="panel-head"><div><h3>Evidence ingestion</h3><p>MP4 only · maximum 100 MB · longer footage is reviewed through sampled frames.</p></div><span class="badge lime">Video</span></div>
+          <label class="dropzone" id="videoDropzone" for="videoInput">
+            <span class="dz-icon"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12"/><path d="M16 10l5-3v10l-5-3"/></svg></span>
+            <span class="dz-kicker">Evidence ingestion</span>
+            <strong>Drop workplace video</strong>
+            <small>or click to select an MP4 from this device</small>
+            <input class="hidden-input" id="videoInput" type="file" accept="video/mp4,.mp4">
+          </label>
+          <div class="guest-sample" data-guest-only hidden>
+            <span><strong>Guest sample</strong> · pre-computed, no upload</span>
+            <button class="btn small" type="button" data-guest-sample="video">Or test with a pre-loaded sample</button>
+          </div>
+          <div class="demo-replay" id="videoDemoReplay" hidden role="status" aria-live="polite">
+            <div class="demo-replay-head"><span class="badge lime">DEMO REPLAY</span><span>PRE-COMPUTED DEMO · NO LIVE INSPECTION · NO UPLOAD SENT</span></div>
+            <div class="stage-track"><ol class="stages" id="videoDemoSteps">
+              <li data-stage><span class="n">01</span><span class="st-name">Ingest</span><span class="st-desc">Pre-loaded synthetic sample</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">02</span><span class="st-name">Detect</span><span class="st-desc">Pre-computed demo result</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">03</span><span class="st-name">Review</span><span class="st-desc">Pre-computed demo result</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">04</span><span class="st-name">Verify</span><span class="st-desc">Open the demo report</span><span class="st-state">QUEUED</span></li>
+            </ol></div>
+            <p class="proc-note">This is a replay of pre-computed synthetic results. No file was uploaded, and SAM 3.1 / Muse Spark were not run.</p>
+            <a class="btn primary small" id="videoDemoOpen" href="/outputs/de0000000003/outputs/video_inspection_report.html" target="_blank" rel="noopener" hidden>Open pre-computed demo report</a>
+          </div>
+          <div class="selected" id="videoSelected">
+            <div class="sel-frame" id="videoFrame"><span class="scan-chip"><i></i>ANALYZING EVIDENCE</span><video id="videoPreview" controls muted playsinline></video></div>
+            <div class="sel-meta"><div style="min-width:0"><strong id="videoFileName"></strong><span id="videoFileMeta"></span></div><button class="btn ghost small" type="button" id="clearVideo" style="color:var(--crit)">Remove ✕</button></div>
+            <dl class="facts">
+              <div><dt>File type</dt><dd id="videoFactType">MP4 VIDEO</dd></div>
+              <div><dt>File size</dt><dd id="videoFactSize">—</dd></div>
+              <div><dt>Duration</dt><dd id="videoFactDuration">—</dd></div>
+              <div><dt>Evidence status</dt><dd class="ready" id="videoFactStatus">READY</dd></div>
+            </dl>
+          </div>
+          <div class="action-bar idle" id="videoActionBar">
+            <button class="btn primary" type="button" id="runVideo" disabled>Run safety inspection →</button>
+            <div class="action-meta"><b id="videoHint">AWAITING MP4</b><span>Sampled-frame review · timestamped report · human verification</span></div>
+          </div>
+          <div class="processing" id="videoProcessing" role="status" aria-live="polite">
+            <div class="proc-top"><span class="spinner"></span><span class="proc-title">Analyzing workplace video</span><span class="proc-sub">ELAPSED <span class="elapsed" data-elapsed>0:00</span><br>STAGES SHOWN — NOT LIVE PROGRESS</span></div>
+            <div class="stage-track"><ol class="stages" id="videoStages">
+              <li data-stage><span class="n">01</span><span class="st-name">Upload received</span><span class="st-desc">MP4 validated on the server</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">02</span><span class="st-name">Detecting workers</span><span class="st-desc">SAM 3.1 person tracking</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">03</span><span class="st-name">Detecting hard hats</span><span class="st-desc">SAM 3.1 + worker association</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">04</span><span class="st-name">Reviewing evidence</span><span class="st-desc">Muse Spark · sampled frames</span><span class="st-state">QUEUED</span></li>
+              <li data-stage><span class="n">05</span><span class="st-name">Building report</span><span class="st-desc">Timestamped evidence report</span><span class="st-state">QUEUED</span></li>
+            </ol></div>
+            <p class="proc-note">Video analysis reviews <strong>sampled frames</strong>, not every frame — unreviewed intervals are never assumed compliant. The service does not stream live progress, so the highlighted stage advances on a timer to show the pipeline order. It is not a percentage and not backend telemetry. Video inspection can take several minutes — keep this page open.</p>
+          </div>
+          <div class="alert err" id="videoError" role="alert"></div>
+          <div class="alert ok" id="videoDone"><strong>Inspection complete.</strong><p id="videoDoneText"></p><a class="link-btn" id="videoDoneReport" href="#" target="_blank" rel="noopener">Open generated report</a> &nbsp;·&nbsp; <button class="link-btn" type="button" id="videoDoneDetail">Review in SOPProof</button></div>
+          <div class="samples"><div class="samples-head"><strong>Reuse saved evidence</strong><span>FROM REPORT HISTORY</span></div><div class="sample-grid" id="videoSamples"><div class="empty" style="grid-column:1/-1"><strong>Loading</strong>Checking saved media…</div></div></div>
+        </section>
+
+        <section class="result-block" id="videoResults">
+          <div class="sect-head" style="margin-top:26px"><div><h2>Video assessment</h2><p>Summary returned after sampled-frame review. Open the report for frame-by-frame evidence and timestamps.</p></div></div>
+          <div class="assess">
+            <div><span class="label">Overall assessment</span><div class="a-value warn" id="videoOverall">Review completed</div></div>
+            <div class="assess-actions"><span class="badge warn">Human review required</span><span class="row"><a class="btn primary small" id="videoReportLink" href="#" target="_blank" rel="noopener">Open full report</a><button class="btn small" type="button" id="videoResultDetail">Review in workspace</button></span></div>
+          </div>
+          <div class="stat-strip four">
+            <div class="stat-cell"><strong id="videoFileMetric" style="font-size:15px;line-height:1.3;overflow-wrap:anywhere">—</strong><span>Source video</span></div>
+            <div class="stat-cell"><strong id="videoDuration">—</strong><span>Duration, read from your file</span></div>
+            <div class="stat-cell"><strong id="videoFrames">—</strong><span>Frames sampled · successful / failed</span></div>
+            <div class="stat-cell"><strong id="videoConcerns">—</strong><span>Concern observations</span></div>
+          </div>
+          <div class="evidence-bar">
+            <span class="badge lime">Timestamped evidence</span>
+            <p class="eb-txt" id="videoEvidenceText"><strong>The full report holds the reviewed frames at their timestamps.</strong> Open it to verify each finding against the original footage.</p>
+            <div class="ts-chips" id="videoTimestamps"></div>
+          </div>
+        </section>
+      </div>
+      <div class="side-stack">
+        <section class="side-block">
+          <h3>Detection scope</h3><p>Interface preferences, saved in this browser.</p>
+          <span class="cfg-label">Target classes</span>
+          <label class="check"><input type="checkbox" data-pref-class="helmets" checked> Hard hats / helmets</label>
+          <div class="cs-row">
+            <div class="cs-group">
+              <label class="check is-disabled"><input type="checkbox" data-pref-class="vests" disabled> High-visibility vests <span class="roadmap-badge">ROADMAP</span></label>
+              <label class="check is-disabled"><input type="checkbox" data-pref-class="harness" disabled> Fall harness <span class="roadmap-badge">ROADMAP</span></label>
+              <label class="check is-disabled"><input type="checkbox" data-pref-class="zones" disabled> Restricted-zone entry <span class="roadmap-badge">ROADMAP</span></label>
+            </div>
+            <span class="cs-link" aria-hidden="true"></span>
+            <span class="cs-callout-wrap"><svg class="cs-sparks" viewBox="0 0 40 10" aria-hidden="true" focusable="false"><path d="M6 9c1.5-2.3 3-4.6 4.2-6.8M20 8.5V1.8M34 9c-1.4-2.3-2.9-4.6-4.1-6.7"/></svg><span class="cs-callout">COMING SOON</span></span>
+          </div>
+          <div class="cs-row">
+            <div class="cs-group">
+              <div class="range-row is-planned"><label for="confidenceRangeVideo">Confidence threshold</label><span class="soon-badge">NOT APPLIED</span><output id="confidenceValueVideo">70%</output></div>
+              <input id="confidenceRangeVideo" type="range" min="30" max="95" step="5" value="70" disabled aria-describedby="confidenceHelpVideo">
+            </div>
+            <span class="cs-link" aria-hidden="true"></span>
+            <span class="cs-callout-wrap"><svg class="cs-sparks" viewBox="0 0 40 10" aria-hidden="true" focusable="false"><path d="M6 9c1.5-2.3 3-4.6 4.2-6.8M20 8.5V1.8M34 9c-1.4-2.3-2.9-4.6-4.1-6.7"/></svg><span class="cs-callout">COMING SOON</span></span>
+          </div>
+          <p class="cfg-help" id="confidenceHelpVideo">Display preference only. Does not affect inspection results yet.</p>
+          <span class="cfg-label">Review mode</span>
+          <div class="cs-row">
+            <div class="cs-group">
+              <div class="seg is-planned"><button type="button" class="on" data-review-mode="standard" disabled>Standard</button><button type="button" data-review-mode="strict" disabled>Strict</button></div>
+            </div>
+            <span class="cs-link" aria-hidden="true"></span>
+            <span class="cs-callout-wrap"><svg class="cs-sparks" viewBox="0 0 40 10" aria-hidden="true" focusable="false"><path d="M6 9c1.5-2.3 3-4.6 4.2-6.8M20 8.5V1.8M34 9c-1.4-2.3-2.9-4.6-4.1-6.7"/></svg><span class="cs-callout">COMING SOON</span></span>
+          </div>
+          <p class="cfg-help">Review-mode configuration is not yet connected to the inspection service.</p>
+          <div class="note-box">The current pipeline detects people and hard hats. Additional detection classes, confidence threshold, and review modes are coming soon.</div>
+        </section>
+        <section class="side-block">
+          <h3>How evidence is judged</h3>
+          <ol class="steps">
+            <li><b>01</b><span>SAM 3.1 tracks workers and hard hats through the footage.</span></li>
+            <li><b>02</b><span>Selected original frames are reviewed visually — unreviewed intervals are never assumed compliant.</span></li>
+            <li><b>03</b><span>Verify flagged timestamps against the original footage.</span></li>
+          </ol>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REPORTS ================= -->
+  <section class="view" id="view-reports" data-view="reports" hidden>
+    <div class="demo-banner" data-guest-only hidden style="margin:0 0 20px"><span class="badge lime">Guest Demo</span><p style="margin:0"><strong>Preview only.</strong> Choose an upload area to sign in or explore demo results — no files are uploaded in guest mode. <button class="link-btn" type="button" data-exit-demo>Exit demo &amp; sign in</button> with an invited account to run real inspections.</p></div>
+    <div class="page-head" style="padding-top:0">
+      <span class="label">Evidence archive</span>
+      <h2>Every inspection,<br>on record.</h2>
+      <p>Saved photo and video inspections with findings and verification state. Review decisions are stored in this browser.</p>
+    </div>
+    <section class="panel panel-pad" id="adminInvites" hidden style="margin-top:20px">
+      <div class="panel-head"><div><h3>Registration invitations</h3><p>Admin only. Create a one-time invitation link and share it out-of-band. Links are shown once and can be revoked.</p></div><span class="badge warn">Admin</span></div>
+      <form id="inviteForm" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input class="auth-input" id="inviteEmail" type="email" placeholder="Invitee email (optional)" style="flex:1;min-width:220px">
+        <button class="btn primary" type="submit">Create invitation</button>
+      </form>
+      <div id="inviteResult" hidden style="margin-top:14px">
+        <label class="cfg-label" for="inviteLink">Invitation link — copy it now, it will not be shown again</label>
+        <div style="display:flex;gap:8px"><input class="auth-input" id="inviteLink" readonly style="flex:1"><button class="btn" type="button" id="copyInvite">Copy</button></div>
+      </div>
+      <div id="inviteList" style="margin-top:14px"></div>
+    </section>
+    <section class="panel" style="margin-top:20px">
+      <div class="lib-head"><strong>Evidence library</strong><span id="reportCount">LOADING…</span></div>
+      <div class="lib-tools">
+        <label class="search"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><span class="sr-only">Search reports</span><input id="reportSearch" type="search" placeholder="Search by report ID or filename…"></label>
+        <select class="select" id="reportSort" aria-label="Sort reports"><option value="newest">Newest first</option><option value="risk">Highest risk first</option></select>
+        <button class="btn" type="button" id="refreshReports">Refresh</button>
+      </div>
+      <div class="filters" role="group" aria-label="Filter reports">
+        <button class="fpill on" type="button" data-filter="all">All reports</button>
+        <button class="fpill" type="button" data-filter="flagged">Flagged concerns</button>
+        <button class="fpill" type="button" data-filter="photo">Photos</button>
+        <button class="fpill" type="button" data-filter="video">Videos</button>
+        <button class="fpill" type="button" data-filter="pending">Pending review</button>
+      </div>
+      <div class="bulk"><label><input id="selectAllReports" type="checkbox"> Select visible</label><div class="bulk-r"><span id="selectedCount">0 SELECTED</span><button class="btn small" type="button" id="exportSelected" disabled>Export CSV</button></div></div>
+      <div class="table-scroll"><table class="grid"><thead><tr><th><span class="sr-only">Select</span></th><th>Media / report</th><th>Inspection time</th><th>AI findings</th><th>Human review</th><th>Actions</th></tr></thead><tbody id="reportTableBody"><tr><td colspan="6"><div class="empty"><strong>Loading evidence library</strong>Fetching saved inspection reports…</div></td></tr></tbody></table></div>
+    </section>
+  </section>
+
+  <!-- ================= DETAIL ================= -->
+  <section class="view" id="view-detail" data-view="detail" hidden>
+    <div style="padding-top:18px"><button class="btn ghost small" type="button" data-go="/reports" style="padding-left:0">← Evidence library</button></div>
+    <div class="detail-id">
+      <span class="label" id="detailCrumb">Report detail</span>
+      <h2 id="detailTitle">Loading report…</h2>
+      <p id="detailSub">EVIDENCE AND REVIEWER DECISION</p>
+    </div>
+    <div class="assess" id="detailAssess" style="margin-top:16px">
+      <div><span class="label">Overall AI assessment — human verification decides</span><div class="a-value warn" id="detailOverall" style="font-size:22px">Loading…</div></div>
+      <div class="assess-actions"><span id="detailStatus"></span><span class="row"><a class="btn small" id="openDetailReport" href="#" target="_blank" rel="noopener">Open HTML report</a><button class="btn small" type="button" id="downloadDetailReport">Download</button></span></div>
+    </div>
+    <div class="detail-grid">
+      <div>
+        <section>
+          <div class="sect-head"><div><h2 style="font-size:19px">Source evidence</h2></div><span class="badge info" id="overlayBadge">No stored SAM geometry</span></div>
+          <div class="stage" id="detailEvidence"><div class="ph">Loading source media…</div></div>
+          <div class="stage-bar"><span id="overlayNote">Checking what evidence this report contains.</span></div>
+          <div class="frame-focus" id="frameFocus"><img id="frameFocusImage" alt="Selected reviewed video frame"><p id="frameFocusCaption"></p></div>
+          <div id="timelineWrap" hidden>
+            <h3 class="sub-title" style="font-size:15px">Reviewed timestamps</h3>
+            <p style="margin:0;font-size:11.5px;color:var(--mut)">Frames selected for Muse Spark review. Flagged frames need verification against the footage.</p>
+            <div class="timeline" id="videoTimeline"></div>
+          </div>
+        </section>
+        <section>
+          <h3 class="sub-title">AI findings</h3>
+          <p id="detailFinding" style="margin:0;font-size:13px;line-height:1.7;color:var(--mut)">Loading findings…</p>
+          <div id="detailWorkers" style="margin-top:12px"></div>
+          <div class="note-box" style="margin-top:14px">AI observations are evidence prompts, not confirmed violations or legal determinations. Only a human reviewer can confirm a finding.</div>
+        </section>
+      </div>
+      <div>
+        <section class="review-panel">
+          <div class="rp-head"><strong>Human verification</strong><span id="detailReviewBadge" class="badge warn">Needs review</span></div>
+          <p id="demoActionLabel" class="demo-action-label" hidden>DEMO ACTION — saved locally only; not an official inspection decision.</p>
+          <p id="reviewPanelText">Check the evidence, then record the safety officer's decision.</p>
+          <div class="rp-actions">
+            <button class="btn confirm" type="button" id="confirmViolation">Confirm violation</button>
+            <button class="btn dismiss" type="button" id="dismissViolation">Dismiss — false positive</button>
+          </div>
+          <label class="cfg-label" for="inspectorNote">Inspector note</label>
+          <textarea class="note" id="inspectorNote" placeholder="Context, corrective action, or verification notes…"></textarea>
+          <button class="btn primary" type="button" id="saveInspectorNote" style="width:100%;margin-top:9px">Save note</button>
+          <p id="demoNoteEcho" class="demo-note-echo" hidden></p>
+          <div class="note-box">Decisions and notes are stored only in this browser. No shared server audit log exists yet.</div>
+        </section>
+        <section class="side-block" style="margin-top:16px">
+          <h3 style="font-size:15px">Report record</h3>
+          <div class="meta-list" id="detailMeta" style="margin-top:8px"></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot-note">SOPPROOF · SAM 3.1 DETECTION + MUSE SPARK VISUAL REVIEW · AI ASSISTANCE SUPPORTS — AND NEVER REPLACES — ON-SITE SAFETY VERIFICATION</p>
+</div></main>
+<div class="guest-gate" id="guestGate" hidden role="dialog" aria-modal="true" aria-labelledby="guestGateTitle" aria-describedby="guestGateDesc">
+  <div class="guest-gate-backdrop" data-guest-close></div>
+  <div class="guest-gate-card">
+    <button class="guest-gate-close" type="button" id="guestGateClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+    <div class="guest-gate-head">
+      <span class="guest-gate-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M15 26v-2.2A9.2 9.2 0 0 1 21.5 15V26h5V15a9.2 9.2 0 0 1 6.5 8.8V26" fill="#fff"/><rect x="8" y="26" width="32" height="4.6" rx="2.3" fill="#fff"/><rect x="13" y="33.4" width="22" height="3" rx="1.5" fill="#fff" opacity=".72"/></svg></span>
+      <span class="guest-gate-kicker" id="guestGateKicker">Guest demo</span>
+    </div>
+    <h2 id="guestGateTitle">Want to inspect workplace evidence?</h2>
+    <p class="guest-gate-desc" id="guestGateDesc">Sign in to run a real AI-powered inspection, or explore an example inspection to see SOPProof in action.</p>
+    <div class="guest-gate-actions">
+      <button class="btn primary" type="button" id="guestGateSignIn">Sign in to inspect <span aria-hidden="true">→</span></button>
+      <button class="btn" type="button" id="guestGateDemo">Explore demo results</button>
+    </div>
+    <p class="guest-gate-note">Demo results are illustrative and are not real inspection findings.</p>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const state={reports:[],filter:"all",search:"",sort:"newest",selected:new Set(),route:"overview",detailId:null,photo:null,video:null,photoUrl:null,videoUrl:null,videoSeconds:null,lastPhoto:null,lastVideo:null,user:null,csrf:"",authReady:false,guestAllowance:null};
+const REVIEW_KEY="sopproof-review-state-v1", PREF_KEY="sopproof-detection-preferences-v1", THEME_KEY="sopproof-theme";
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m){const e=$("#toast");e.textContent=m;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),3000);}
+const readJSON=(k,f)=>{try{const v=JSON.parse(localStorage.getItem(k)||"null");return v??f;}catch(_){return f;}};
+/* Guest demo review state lives in sessionStorage under a per-guest-session
+   scope, never in the shared per-user localStorage key. Exiting the demo
+   clears the scope; a new guest session mints a fresh one. */
+const DEMO_SESSION_KEY="sopproof-demo-session-v1";
+let demoNonceFallback=null;
+function demoSessionId(){try{let v=sessionStorage.getItem(DEMO_SESSION_KEY);if(!v){v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():("demo-"+Date.now()+"-"+Math.random().toString(36).slice(2));sessionStorage.setItem(DEMO_SESSION_KEY,v);}return v;}catch(_){if(!demoNonceFallback)demoNonceFallback="demo-"+Date.now()+"-"+Math.random().toString(36).slice(2);return demoNonceFallback;}}
+function clearDemoReviewState(){try{const scope=sessionStorage.getItem(DEMO_SESSION_KEY);if(scope)sessionStorage.removeItem("sopproof-demo-review-v1:"+scope);sessionStorage.removeItem(DEMO_SESSION_KEY);}catch(_){}}
+const reviewStore=()=>{try{return (state.user&&state.user.is_guest)?sessionStorage:localStorage;}catch(_){return localStorage;}};
+const reviewKey=()=>{if(state.user&&state.user.is_guest)return "sopproof-demo-review-v1:"+demoSessionId();return state.user?REVIEW_KEY+":"+state.user.id:REVIEW_KEY;};
+const reviews=()=>{try{const v=JSON.parse(reviewStore().getItem(reviewKey())||"null");return v??{};}catch(_){return{};}};
+function reviewFor(r){const s=reviews()[r.id];if(s&&["confirmed","dismissed"].includes(s.status)){if(state.user&&state.user.is_guest)return{status:"verified",label:s.status==="confirmed"?"Confirmed by demo reviewer":"Dismissed by demo reviewer",action:s.status,note:s.note||"",updatedAt:s.updatedAt||null};return{status:"verified",label:"Verified by human",action:s.status,...s};}if(!r.humanReviewRequired&&r.concernCount===0)return{status:"auto",label:"Auto-cleared"};return{status:"pending",label:"Needs review",...(s||{})};}
+const fmtDate=d=>!d||isNaN(d)?"Date unavailable":d.toLocaleString(undefined,{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+function relTime(d){if(!d||isNaN(d))return"Time unavailable";const s=Math.max(0,Math.round((Date.now()-d.getTime())/1000));if(s<60)return"Just now";if(s<3600){const n=Math.floor(s/60);return n+" minute"+(n===1?"":"s")+" ago";}if(s<86400){const n=Math.floor(s/3600);return n+" hour"+(n===1?"":"s")+" ago";}if(s<604800){const n=Math.floor(s/86400);return n+" day"+(n===1?"":"s")+" ago";}return fmtDate(d);}
+const mb=b=>((b||0)/1048576).toFixed(2)+" MB";
+/* ---------- guest login gate (frontend only; backend stays authoritative) ---------- */
+const GUEST_DEMO_REPORTS={photo:"/outputs/de0000000001_report.html",video:"/outputs/de0000000003/outputs/video_inspection_report.html"};
+/* Stable, deterministic display IDs for the synthetic demo records only.
+   Real inspection IDs are random 12-hex and are never remapped. */
+const DEMO_DISPLAY_IDS={"de0000000001":"#8f4a9c","de0000000002":"#5a7f3a","de0000000003":"#3b2e1d"};
+const demoDisplayId=r=>r?DEMO_DISPLAY_IDS[r.id]||null:null;
+const isDemoReport=r=>!!demoDisplayId(r);
+const WATERMARKED_REPORT_ID=["a49f","5f92","b38a"].join("");
+const isWatermarkedReport=r=>!!r&&(r.id===WATERMARKED_REPORT_ID||String(r.sourceName||"").includes(WATERMARKED_REPORT_ID)||String(r.url||"").includes(WATERMARKED_REPORT_ID));
+const concernBadgeClass=n=>n>=2?"bad":n===1?"warn":"safe";
+const GUEST_GATE_COPY={photo:{kicker:"Guest demo · Photo inspection",title:"Want to inspect workplace evidence?",desc:"Sign in to run a real AI-powered inspection, or explore an example inspection to see SOPProof in action."},video:{kicker:"Guest demo · Video inspection",title:"See how SOPProof reviews workplace footage.",desc:"Sign in to run a real AI-powered video inspection, or explore an example inspection to see SOPProof in action."}};
+let guestGateKind="photo",guestGateLastFocus=null;
+function isGuest(){return !!(state.user&&state.user.is_guest);}
+const guestBlocked=()=>!!(isGuest()&&state.guestAllowance&&state.guestAllowance.remaining<=0);
+function renderGuestAllowance(){const a=state.guestAllowance,guest=isGuest();for(const p of["photo","video"]){const t=document.getElementById(p+"AllowanceText");if(t)t.textContent=(guest&&a)?(a.remaining+" of "+a.limit+" inspections remaining"):"— of 2 inspections remaining";const lim=document.getElementById(p+"GuestLimit");if(lim)lim.hidden=!(guest&&a&&a.remaining<=0);}if(guestBlocked()){const rp=$("#runPhoto"),rv=$("#runVideo");if(rp)rp.disabled=true;if(rv)rv.disabled=true;}}
+async function refreshGuestAllowance(){if(!isGuest())return;try{const r=await fetch("/api/auth/me",{cache:"no-store"});if(r.ok){const d=await r.json();if(d.user&&d.user.guest_inspections){state.guestAllowance=d.user.guest_inspections;renderGuestAllowance();}}}catch(_){/* allowance resync is best-effort; backend enforces the limit */}}
+async function pollInspection(id){for(let i=0;i<720;i++){const r=await fetch("/api/inspections/"+encodeURIComponent(id),{cache:"no-store"});const d=await r.json().catch(()=>({}));if(r.ok&&d.status==="completed")return d;if(r.ok&&d.status==="failed"){const ex=new Error(d.error||"Inspection failed.");ex.status=500;throw ex;}if(!r.ok){const ex=new Error(typeof d.detail==="string"?d.detail:"Could not read inspection status.");ex.status=r.status;throw ex;}await new Promise(res=>setTimeout(res,2500));}const ex=new Error("Inspection is still processing — check Inspection reports shortly.");ex.status=500;throw ex;}
+function openGuestGate(kind){const gate=$("#guestGate");if(!gate||!gate.hidden)return;guestGateKind=kind==="video"?"video":"photo";const c=GUEST_GATE_COPY[guestGateKind];$("#guestGateKicker").textContent=c.kicker;$("#guestGateTitle").textContent=c.title;$("#guestGateDesc").textContent=c.desc;guestGateLastFocus=document.activeElement;gate.hidden=false;$("#guestGateSignIn").focus();}
+function closeGuestGate(){const gate=$("#guestGate");if(!gate||gate.hidden)return;gate.hidden=true;if(guestGateLastFocus&&typeof guestGateLastFocus.focus==="function")guestGateLastFocus.focus();}
+$("#guestGateClose").addEventListener("click",closeGuestGate);
+$("[data-guest-close]").addEventListener("click",closeGuestGate);
+$("#guestGateDemo").addEventListener("click",()=>{const url=GUEST_DEMO_REPORTS[guestGateKind];closeGuestGate();window.open(url,"_blank","noopener");});
+$("#guestGateSignIn").addEventListener("click",()=>{closeGuestGate();if(isGuest()){$("#logoutBtn").click();}else{navigate("/login");}});
+/* ---------- guest pre-loaded sample: DEMO REPLAY of pre-computed results.
+   No file is read, nothing is fetched or posted, and SAM/Muse never run. ---------- */
+function playGuestSample(kind){
+  if(!isGuest())return;
+  const type=kind==="video"?"video":"photo";
+  const panel=$(type==="video"?"#videoDemoReplay":"#photoDemoReplay");
+  const stepsId=type==="video"?"videoDemoSteps":"photoDemoSteps";
+  const openLink=$(type==="video"?"#videoDemoOpen":"#photoDemoOpen");
+  const btn=$('[data-guest-sample="'+type+'"]');
+  if(!panel)return;
+  if(btn){btn.disabled=true;btn.textContent="Playing demo replay…";}
+  panel.hidden=false; if(openLink)openLink.hidden=true;
+  const items=stageItems(stepsId);
+  const paint=active=>{items.forEach((li,j)=>{const n=li.querySelector(".n"),st=li.querySelector(".st-state");li.classList.toggle("done",j<active);li.classList.toggle("live",j===active);if(j<active){n.textContent="✓";if(st)st.textContent="DONE";}else if(j===active){n.textContent=String(j+1).padStart(2,"0");if(st)st.textContent="IN PROGRESS";}else{n.textContent=String(j+1).padStart(2,"0");if(st)st.textContent="QUEUED";}});};
+  let i=0; paint(0);
+  panel.scrollIntoView({behavior:"smooth",block:"nearest"});
+  const timer=setInterval(()=>{
+    i++;
+    if(i<items.length){paint(i);return;}
+    clearInterval(timer); paint(items.length);
+    if(openLink){openLink.hidden=false;}
+    window.open(GUEST_DEMO_REPORTS[type],"_blank","noopener");
+    if(btn){btn.disabled=false;btn.textContent="Or test with a pre-loaded sample";}
+  },550);
+}
+$$("[data-guest-sample]").forEach(b=>b.addEventListener("click",()=>playGuestSample(b.dataset.guestSample)));
+document.addEventListener("keydown",e=>{const gate=$("#guestGate");if(!gate||gate.hidden)return;if(e.key==="Escape"){e.preventDefault();closeGuestGate();return;}if(e.key!=="Tab")return;const f=$$("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",gate).filter(el=>!el.disabled&&el.offsetParent!==null);if(!f.length)return;const first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
+const icon=t=>t==="video"?'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12"/><path d="M16 10l5-3v10l-5-3"/></svg>':'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14"/><circle cx="12" cy="12" r="3"/></svg>';
+function idFromUrl(rawUrl,rawName=""){try{const p=new URL(rawUrl,location.origin).pathname.split("/").filter(Boolean);const i=p.indexOf("outputs");if(i>=0&&p[i+2]==="outputs"&&p[i+1])return p[i+1];const m=String(rawName||p.at(-1)||"").match(/^([a-f0-9]{6,})_report\.html?$/i);if(m)return m[1];const l=p.at(-1)||"";const v=l.match(/([a-f0-9]{6,})/i);return v?v[1]:l.replace(/\.html?$/i,"");}catch(_){return String(rawName).replace(/\.html?$/i,"");}}
+const absAsset=(src,base)=>{if(!src)return"";try{return new URL(src,new URL(base,location.origin)).href;}catch(_){return src;}};
+const pretty=s=>String(s||"").replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
+
+/* /api/reports returns name/url/created only; detail fields are read from the
+   generated HTML reports — the existing contract, preserved unchanged. */
+async function enrichReport(raw){
+  const url=raw.url||"#", isVideo=/video_inspection_report/i.test(url)||/video/i.test(raw.name||"");
+  const r={id:idFromUrl(url,raw.name),url,rawName:raw.name||"inspection_report.html",isVideo,created:raw.created?new Date(Number(raw.created)*1000):null,sourceName:raw.name||"Inspection report",title:"Inspection report",humanReviewRequired:true,concernCount:0,safeCount:0,observationCount:0,peopleCount:0,frameCount:0,sampledCount:0,successfulReviews:0,failedReviews:0,mediaUrl:"",thumbnailUrl:"",frames:[],people:[],summary:"Assessment details are in the original report.",overall:"Review pending",loadError:false};
+  try{
+    const res=await fetch(url,{cache:"no-store"}); if(!res.ok)throw new Error("fetch "+res.status);
+    const doc=new DOMParser().parseFromString(await res.text(),"text/html");
+    const body=doc.body?.innerText||doc.body?.textContent||"";
+    const lines=$$(".summary p",doc).map(p=>p.textContent.trim());
+    const m=(lines.find(l=>/^Source (image|video):/i.test(l))||"").match(/^Source (?:image|video):\s*(.+)$/i);
+    if(m)r.sourceName=m[1].trim();
+    r.title=r.sourceName!==raw.name?r.sourceName:(isVideo?"Video inspection":"Photo inspection");
+    r.overall=$(".overall, .result",doc)?.textContent.trim()||(/potential missing helmet/i.test(body)?"Potential Missing Helmet":"Review completed");
+    const rev=$(".review, .summary .status",doc);
+    r.humanReviewRequired=rev?/yes|required/i.test(rev.textContent):(/human review required:\s*yes|human review:\s*required/i.test(body)||isVideo);
+    r.summary=r.overall;
+    if(isVideo){
+      for(const st of $$(".stats .stat",doc)){const l=$("span",st)?.textContent.trim().toLowerCase()||"",v=Number($("strong",st)?.textContent.trim()||0);if(l.includes("total video frames"))r.frameCount=v;if(l.includes("frames sampled"))r.sampledCount=v;if(l.includes("successful ai reviews"))r.successfulReviews=v;if(l.includes("failed ai reviews"))r.failedReviews=v;}
+      r.mediaUrl=absAsset($("video source",doc)?.getAttribute("src")||$("video",doc)?.getAttribute("src"),url);
+      r.frames=$$(".frame-card",doc).map((card,i)=>{
+        const head=$(".frame-header",card), ts=($("p",head||card)?.textContent||"").match(/([0-9]+(?:\.[0-9]+)?)\s*seconds?/i);
+        const status=$(".frame-header .status, .frame-header .assessment",card)?.textContent.trim()||"Review status unavailable";
+        const people=$$(".person-card",card).map(pc=>{const b=$(".status",pc);return{name:$(".person-heading strong",pc)?.textContent.trim()||"Worker",status:b?.textContent.trim()||"Uncertain",flagged:/potential missing|uncertain|review failed/i.test(b?.textContent||"")||/warning|error/.test(b?.className||""),safe:/helmet visible|all helmets visible/i.test(b?.textContent||""),evidence:$(".evidence p",pc)?.textContent.trim()||$(".evidence",pc)?.textContent.trim()||""};});
+        r.observationCount+=people.length; r.concernCount+=people.filter(p=>p.flagged).length; r.safeCount+=people.filter(p=>p.safe).length;
+        return{label:$("h3",head||card)?.textContent.trim()||("Frame "+i),timestamp:Number(ts?.[1]||0),status,flagged:/potential missing|uncertain|review failed/i.test(status)||people.some(p=>p.flagged),imageUrl:absAsset($("img.frame-image",card)?.getAttribute("src")||"",url),people};
+      });
+      r.peopleCount=r.frames.length?Math.max(...r.frames.map(f=>f.people.length)):0;
+      r.sampledCount=r.sampledCount||r.frames.length;
+      r.thumbnailUrl=r.frames.find(f=>f.imageUrl)?.imageUrl||"";
+      if(!r.observationCount&&/potential missing helmet/i.test(body))r.concernCount=1;
+    }else{
+      const metrics=$$(".metrics .metric",doc), mv=l=>{const it=metrics.find(x=>$(".metric-label",x)?.textContent.toLowerCase().includes(l));return Number($(".metric-number",it)?.textContent.trim()||0);};
+      r.peopleCount=mv("people detected");
+      r.people=$$(".table-wrap tbody tr",doc).filter(row=>$$("td",row).length>=4).map(row=>{const c=$$("td",row),st=c[3]?.textContent.trim()||"Uncertain";return{name:c[0]?.textContent.trim()||"Worker",head:c[1]?.textContent.trim()||"",helmetObs:c[2]?.textContent.trim()||"",status:st,flagged:/potential missing|uncertain/i.test(st),safe:/helmet visible/i.test(st),evidence:c[4]?.textContent.trim()||""};});
+      r.observationCount=r.people.length; r.concernCount=r.people.filter(p=>p.flagged).length; r.safeCount=r.people.filter(p=>p.safe).length;
+      if(!r.people.length&&/potential missing helmet/i.test(body))r.concernCount=1;
+      if(r.sourceName&&r.sourceName!=="Not specified")r.mediaUrl="/uploads/"+encodeURIComponent(r.sourceName);
+      const img=$(".container img, .report img",doc)?.getAttribute("src"); r.thumbnailUrl=img?absAsset(img,url):r.mediaUrl;
+    }
+  }catch(e){r.loadError=true;r.summary="This report could not be parsed in the dashboard. Open the original HTML report for full details.";console.warn("SOPProof enrich:",e);}
+  r.review=reviewFor(r); return r;
+}
+async function loadReports(){
+  const cnt=$("#reportCount"); if(cnt)cnt.textContent="REFRESHING…";
+  try{
+    const res=await fetch("/api/reports",{cache:"no-store"}); if(res.status===401){state.user=null;reflectUser();if(state.authReady)navigate("/login");return;} if(!res.ok)throw new Error("reports failed");
+    const data=await res.json(), raw=Array.isArray(data.reports)?data.reports:[];
+    const enriched=await Promise.all(raw.map(enrichReport)), seen=new Set();
+    state.reports=enriched.filter(r=>{const k=r.id||r.url;if(seen.has(k))return false;seen.add(k);return true;}).sort((a,b)=>(b.created?.getTime()||0)-(a.created?.getTime()||0));
+    renderOverview(); renderLibrary(); renderSamples();
+    if(state.route==="detail"&&state.detailId)renderDetail(state.detailId);
+    if(cnt)cnt.textContent=state.reports.length+" REPORT"+(state.reports.length===1?"":"S");
+  }catch(e){console.error(e); if(cnt)cnt.textContent="UNAVAILABLE";
+    $("#reportTableBody").innerHTML='<tr><td colspan="6"><div class="empty"><strong>Evidence library unavailable</strong>The report service did not respond. Check the API status above and refresh.</div></td></tr>';
+    $("#overviewRecent").innerHTML='<div class="empty"><strong>Recent evidence unavailable</strong>Report history could not be loaded.</div>';
+    $("#flagFeed").innerHTML='<div class="empty"><strong>Priority findings unavailable</strong>Report history could not be loaded.</div>';}
+}
+
+/* ---------- rendering ---------- */
+function reviewBadge(r){const v=reviewFor(r);const cls=v.status==="verified"?"safe":v.status==="auto"?"info":"warn";return '<span class="badge '+cls+'">'+esc(v.label)+"</span>";}
+function rowHtml(r,selectable){
+  const findings='<span class="badge '+concernBadgeClass(r.concernCount)+'">'+(r.concernCount>0?(r.concernCount+" concern"+(r.concernCount===1?"":"s")):(r.observationCount?"No concern flagged":"Review details"))+"</span>";
+  const type=r.isVideo?'<span class="badge info">'+(r.sampledCount||r.frames.length)+" frames sampled</span>":'<span class="badge info">'+r.peopleCount+" workers</span>";
+  const thumb=r.thumbnailUrl?'<img src="'+esc(r.thumbnailUrl)+'" alt="" loading="lazy" onerror="this.remove()">':icon(r.isVideo?"video":"photo");
+  const sel=selectable?'<td><input type="checkbox" data-select="'+esc(r.id)+'" '+(state.selected.has(r.id)?"checked":"")+' aria-label="Select report"></td>':"";
+  return '<tr class="'+(r.concernCount>0?"flagged-row":"")+'">'+sel+'<td><div class="media-cell"><span class="thumb">'+thumb+"<em>"+(r.isVideo?"VIDEO":"PHOTO")+'</em></span><span><span class="media-name" title="'+esc(r.sourceName)+'">'+esc(r.sourceName)+'</span><button class="id-chip" type="button" data-copy="'+esc(demoDisplayId(r)||r.id)+'">ID '+esc(demoDisplayId(r)||((r.id||"").slice(0,8)))+" ⧉</button></span></div></td>"
+    +'<td><span class="t-main">'+esc(relTime(r.created))+'</span><span class="t-sub">'+esc(fmtDate(r.created))+"</span></td>"
+    +'<td><div class="findings">'+type+findings+"</div></td><td>"+reviewBadge(r)+"</td>"
+    +'<td><div class="row-actions"><button class="btn primary small" type="button" data-open="'+esc(r.id)+'">Open report</button><button class="icon-btn" type="button" data-download="'+esc(r.id)+'" aria-label="Download HTML report" title="Download report"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg></button></div></td></tr>';
+}
+function evidenceItem(r){
+  const thumb=r.thumbnailUrl?'<img src="'+esc(r.thumbnailUrl)+'" alt="" loading="lazy" onerror="this.remove()">':icon(r.isVideo?"video":"photo");
+  const unit=r.isVideo?"frames sampled":"workers";
+  const unitVal=r.isVideo?(r.sampledCount||r.frames.length):r.peopleCount;
+  return '<article class="ev-item" data-open="'+esc(r.id)+'" role="button" tabindex="0" aria-label="Open report '+esc(r.sourceName)+'">'
+    +'<span class="ev-thumb">'+thumb+"<em>"+(r.isVideo?"VIDEO":"PHOTO")+'</em></span>'
+    +'<div class="ev-main"><div class="ev-name" title="'+esc(r.sourceName)+'">'+esc(r.sourceName)+'</div><div class="ev-meta">'+(r.isVideo?"Video inspection":"Photo inspection")+" · "+esc(relTime(r.created))+" · "+esc(r.overall)+"</div></div>"
+    +'<div class="ev-stats"><div><b>'+unitVal+'</b><span>'+unit+'</span></div><div><b style="'+(r.concernCount>=2?"color:var(--crit)":r.concernCount===1?"color:var(--warn)":"")+'">'+r.concernCount+'</b><span>concerns</span></div></div>'
+    +'<div class="ev-side">'+reviewBadge(r)+'<button class="btn small" type="button" data-open="'+esc(r.id)+'">Open</button></div></article>';
+}
+function renderFeatured(){
+  const r=state.reports.find(x=>!isWatermarkedReport(x)), media=$("#featuredMedia"), btn=$("#featuredOpen");
+  if(!r){media.classList.remove("demo-preview");media.innerHTML="<span>NO INSPECTION EVIDENCE YET</span>";$("#featuredTitle").textContent="No reports yet";$("#featuredMeta").textContent="Run a photo or video inspection and the newest evidence will appear here.";$("#featuredBadge").innerHTML='<span class="badge info">Awaiting first inspection</span>';btn.disabled=true;btn.onclick=null;return;}
+  const img=r.thumbnailUrl||(!r.isVideo?r.mediaUrl:"");
+  /* Demo thumbnails are realistic sample media with a DEMO DATA label
+     baked into the image corner; the badge below repeats it on the card
+     so the featured evidence is never mistaken for a live inspection. */
+  media.classList.toggle("demo-preview",isDemoReport(r));
+  media.innerHTML=(img?'<img src="'+esc(img)+'" alt="'+(isDemoReport(r)?"Demo inspection evidence — precomputed example":"Latest inspection evidence")+'" onerror="this.remove()">':"")+'<span class="featured-tag"><span class="badge lime">'+(r.isVideo?"Latest video":"Latest photo")+"</span></span>";
+  $("#featuredTitle").textContent=r.sourceName||r.title;
+  $("#featuredMeta").textContent=(r.isVideo?("VIDEO · "+(r.sampledCount||r.frames.length)+" FRAMES SAMPLED · "):("PHOTO · "+r.peopleCount+" WORKERS · "))+relTime(r.created).toUpperCase()+" · "+r.concernCount+" CONCERN"+(r.concernCount===1?"":"S");
+  $("#featuredBadge").innerHTML=r.concernCount>0?'<span class="badge '+concernBadgeClass(r.concernCount)+'">Human review required</span>':reviewBadge(r);
+  btn.disabled=false; btn.onclick=()=>navigate("/reports/"+encodeURIComponent(r.id));
+}
+function renderOverview(){
+  renderFeatured();
+  const rs=state.reports, obs=rs.reduce((a,r)=>a+r.observationCount,0), safe=rs.reduce((a,r)=>a+r.safeCount,0), concerns=rs.reduce((a,r)=>a+r.concernCount,0);
+  const pending=rs.filter(r=>reviewFor(r).status==="pending").length, comp=obs?Math.round(safe/obs*1000)/10:null;
+  $("#kpiTotal").textContent=rs.length;
+  const kr=$("#kpiReports"); if(kr)kr.textContent=rs.length;
+  $("#kpiCompliance").textContent=comp===null?"—":comp.toFixed(1)+"%";
+  $("#kpiComplianceBar").style.width=comp===null?"0%":comp+"%";
+  $("#kpiFlagged").textContent=concerns; $("#kpiPending").textContent=pending;
+  const now=Date.now(), lw=rs.filter(r=>r.created&&now-r.created.getTime()<=7*864e5).length, pw=rs.filter(r=>r.created&&now-r.created.getTime()>7*864e5&&now-r.created.getTime()<=14*864e5).length;
+  $("#kpiTrend").textContent=pw>0?((lw>=pw?"+":"")+Math.round((lw-pw)/pw*100)+"% vs prior 7 days"):lw+" in the last 7 days";
+  const flagged=rs.filter(r=>r.concernCount>0).slice(0,4), feed=$("#flagFeed");
+  feed.innerHTML=flagged.length?"":'<div class="empty"><strong>No flagged detections</strong>Saved reports contain no potential concerns right now. New flags appear here after inspections.</div>';
+  for(const r of flagged){const d=document.createElement("div");d.className="flag-row";d.innerHTML='<span class="flag-sev '+(r.concernCount>1?"high":"rev")+'">'+(r.concernCount>1?"HIGH":"REVIEW")+'</span><div class="flag-main"><strong>'+esc(r.title)+"</strong><span>"+(r.isVideo?"Video evidence":"Photo evidence")+" · "+esc(relTime(r.created))+" · "+r.concernCount+" concern observation"+(r.concernCount===1?"":"s")+' — verification required</span></div><div style="display:flex;gap:8px;align-items:center;flex:0 0 auto">'+reviewBadge(r)+'<button class="link-btn" type="button" data-open="'+esc(r.id)+'">Open →</button></div>';feed.appendChild(d);}
+  $("#overviewCount").textContent=rs.length?("SHOWING "+Math.min(5,rs.length)+" OF "+rs.length):"NO REPORTS";
+  $("#overviewRecent").innerHTML=rs.length?rs.slice(0,5).map(evidenceItem).join(""):'<div class="empty"><strong>No inspections yet</strong>Run your first photo or video inspection to build the evidence record.</div>';
+}
+function filtered(){let rows=[...state.reports];const q=state.search.trim().toLowerCase();if(q)rows=rows.filter(r=>[r.id,r.sourceName,r.rawName,r.title].join(" ").toLowerCase().includes(q));if(state.filter==="flagged")rows=rows.filter(r=>r.concernCount>0);if(state.filter==="photo")rows=rows.filter(r=>!r.isVideo);if(state.filter==="video")rows=rows.filter(r=>r.isVideo);if(state.filter==="pending")rows=rows.filter(r=>reviewFor(r).status==="pending");rows.sort(state.sort==="risk"?(a,b)=>b.concernCount-a.concernCount||(b.created?.getTime()||0)-(a.created?.getTime()||0):(a,b)=>(b.created?.getTime()||0)-(a.created?.getTime()||0));return rows;}
+function renderLibrary(){
+  const rows=filtered();
+  $("#reportCount").textContent=rows.length+" SHOWN · "+state.reports.length+" TOTAL";
+  $("#reportTableBody").innerHTML=rows.length?rows.map(r=>rowHtml(r,true)).join(""):'<tr><td colspan="6"><div class="empty"><strong>No matching records</strong>No reports match this search or filter. Clear the search or choose another filter.</div></td></tr>';
+  $$("#reportTableBody [data-select]").forEach(i=>i.addEventListener("change",()=>{i.checked?state.selected.add(i.dataset.select):state.selected.delete(i.dataset.select);bulkUi();}));
+  $("#selectAllReports").checked=rows.length>0&&rows.every(r=>state.selected.has(r.id)); bulkUi();
+}
+function bulkUi(){$("#selectedCount").textContent=state.selected.size+" SELECTED";$("#exportSelected").disabled=state.selected.size===0;}
+function blobDownload(blob,name){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);}
+async function downloadReport(id){const r=state.reports.find(x=>x.id===id);if(!r)return;try{const res=await fetch(r.url);if(!res.ok)throw 0;blobDownload(await res.blob(),"SOPProof_"+r.id+"_report.html");}catch(_){toast("Could not download this report. Open the original report instead.");}}
+function renderSamples(){
+  for(const type of["photo","video"]){const box=$(type==="photo"?"#photoSamples":"#videoSamples");if(!box)continue;
+    const cand=state.reports.filter(r=>r.isVideo===(type==="video")&&r.mediaUrl).slice(0,3);
+    box.innerHTML=cand.length?cand.map(r=>'<button class="sample-card" type="button" data-sample="'+esc(r.id)+'" data-sample-type="'+type+'"><span class="sample-thumb">'+(r.thumbnailUrl?'<img src="'+esc(r.thumbnailUrl)+'" alt="" loading="lazy" onerror="this.remove()">':icon(type))+'</span><span class="sample-title" title="'+esc(r.sourceName)+'">'+esc(r.sourceName)+'</span><span class="sample-sub">'+(type==="video"?"SAVED MP4":"SAVED IMAGE")+" · LOAD</span></button>").join(""):'<div class="empty" style="grid-column:1/-1"><strong>No reusable evidence yet</strong>Media from completed inspections will appear here for one-click reuse.</div>';}
+}
+async function loadSample(id,type){if(isGuest()){openGuestGate(type);return;}const r=state.reports.find(x=>x.id===id);if(!r?.mediaUrl){toast("Original media is not available for this report.");return;}try{toast("Loading saved media…");const res=await fetch(r.mediaUrl);if(!res.ok)throw 0;const b=await res.blob();const ext=type==="video"?".mp4":(r.sourceName.match(/\.[a-z0-9]+$/i)?.[0]||".jpg");const f=new File([b],r.sourceName||("sample"+ext),{type:b.type||(type==="video"?"video/mp4":"image/jpeg")});navigate(type==="video"?"/video":"/photo");type==="video"?(setInput($("#videoInput"),f),selectVideo(f)):(setInput($("#photoInput"),f),selectPhoto(f));toast("Loaded "+r.sourceName+" into the "+type+" workspace.");}catch(_){toast("Could not load this saved media. It may have been removed.");}}
+function setInput(input,file){try{const t=new DataTransfer();t.items.add(file);input.files=t.files;}catch(_){}}
+
+/* ---------- timers: elapsed only, stage indicator is timer-based (labelled in UI) ---------- */
+function startElapsed(root){stopElapsed();const el=root.querySelector("[data-elapsed]");if(!el)return;const t0=Date.now();const tick=()=>{const s=Math.floor((Date.now()-t0)/1000);el.textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};tick();startElapsed.t=setInterval(tick,1000);}
+function stopElapsed(){if(startElapsed.t)clearInterval(startElapsed.t);startElapsed.t=null;}
+/* Shared 4-stage indicator for both workspaces. Timer-advanced, honestly labelled
+   in the UI as stages shown — not live backend progress. Stage 04 (human
+   verification) never completes automatically: it becomes NEXT when results land. */
+function stageItems(id){return $$("#"+id+" [data-stage]");}
+function paintStages(id,active){const items=stageItems(id),humanLast=items.length===4;items.forEach((li,j)=>{const n=li.querySelector(".n"),st=li.querySelector(".st-state");li.classList.toggle("done",j<active);li.classList.toggle("live",j===active);li.classList.remove("next");if(j<active){n.textContent="✓";if(st)st.textContent="DONE";}else if(j===active){n.textContent=String(j+1).padStart(2,"0");if(st)st.textContent="IN PROGRESS";}else{n.textContent=String(j+1).padStart(2,"0");if(st)st.textContent=(humanLast&&j===3)?"AFTER RESULTS":"QUEUED";}});}
+function startStages(id,stepMs,maxActive){stopStages(false);let i=0;paintStages(id,0);const max=maxActive??(stageItems(id).length-2);startStages.t=setInterval(()=>{if(i<max){i++;paintStages(id,i);}},stepMs||9000);startStages.id=id;}
+function stopStages(reset=true){if(startStages.t)clearInterval(startStages.t);startStages.t=null;if(reset)["photoStages","videoStages"].forEach(id=>paintStages(id,-1));}
+function finishStages(id,needsReview,allDone=false){if(startStages.t)clearInterval(startStages.t);startStages.t=null;stageItems(id).forEach((li,j,arr)=>{const n=li.querySelector(".n"),st=li.querySelector(".st-state");li.classList.remove("live");if(allDone||j<arr.length-1){li.classList.add("done");n.textContent="✓";if(st)st.textContent="DONE";}else{li.classList.remove("done");li.classList.add("next");n.textContent=String(j+1).padStart(2,"0");if(st)st.textContent=needsReview?"NEXT — YOUR DECISION":"REVIEW STATE BELOW";}});}
+const fileTypeLabel=f=>{const ext=(f.name.split(".").pop()||"").toUpperCase();if(f.type)return f.type.split("/").pop().toUpperCase()+" · "+ext;return ext||"FILE";};
+
+/* ---------- photo flow ---------- */
+const err=(id,m)=>{const e=$(id);e.textContent=m||"";e.classList.toggle("show",!!m);};
+function selectPhoto(file){if(!file)return;if(guestBlocked()){$("#photoInput").value="";err("#photoError","Demo inspection limit reached — you've used both inspections in this guest session. Sign in to continue inspecting.");return;}err("#photoError","");const ok=["image/jpeg","image/png","image/webp"].includes(file.type)||/\.(jpe?g|png|webp)$/i.test(file.name);if(!ok){err("#photoError","Invalid file — choose a JPG, PNG or WEBP image.");return;}if(file.size>15*1048576){err("#photoError","File too large — this image exceeds the 15 MB limit.");return;}state.photo=file;$("#photoDropzone").hidden=true;if(state.photoUrl)URL.revokeObjectURL(state.photoUrl);state.photoUrl=URL.createObjectURL(file);const img=$("#photoPreview");img.src=state.photoUrl;$("#photoSelected").classList.add("show");$("#photoFileName").textContent=file.name;$("#photoFileMeta").textContent="EVIDENCE LOADED — READY FOR INSPECTION";$("#photoFactType").textContent=fileTypeLabel(file);$("#photoFactSize").textContent=mb(file.size);$("#photoFactDims").textContent="READING…";$("#photoFactStatus").textContent="READY";img.onload=()=>{$("#photoFactDims").textContent=img.naturalWidth+" × "+img.naturalHeight+" PX";};const btn=$("#runPhoto");btn.disabled=guestBlocked();btn.textContent="Run safety inspection →";$("#photoActionBar").classList.remove("idle");$("#photoHint").textContent="READY — IMAGE LOADED";$("#photoDone").classList.remove("show");$("#photoResults").classList.remove("show");}
+function clearPhoto(){state.photo=null;$("#photoInput").value="";$("#photoDropzone").hidden=false;if(state.photoUrl)URL.revokeObjectURL(state.photoUrl);state.photoUrl=null;$("#photoPreview").removeAttribute("src");$("#photoFrame").classList.remove("scanning");$("#photoSelected").classList.remove("show");$("#runPhoto").disabled=true;$("#photoActionBar").classList.add("idle");$("#photoHint").textContent="AWAITING IMAGE";err("#photoError","");$("#photoDone").classList.remove("show");}
+$("#photoInput").addEventListener("change",e=>selectPhoto(e.target.files[0]));
+$("#clearPhoto").addEventListener("click",clearPhoto);
+$("#runPhoto").addEventListener("click",async()=>{
+  if(guestBlocked()){err("#photoError","Demo inspection limit reached — you've used both inspections in this guest session. Sign in to continue inspecting.");renderGuestAllowance();return;}
+  if(!state.photo)return;const btn=$("#runPhoto");btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Processing evidence…';$("#photoHint").textContent="PROCESSING — DO NOT CLOSE";$("#photoFrame").classList.add("scanning");$("#photoFactStatus").textContent="ANALYZING";$("#photoProcessing").classList.add("show");startElapsed($("#photoProcessing"));startStages("photoStages",7000);err("#photoError","");$("#photoDone").classList.remove("show");$("#photoResults").classList.remove("show");
+  try{const fd=new FormData();fd.append("file",state.photo);const res=await fetch("/api/inspect/photo",{method:"POST",headers:{"x-csrf-token":await ensureCsrf()},body:fd});let data=await res.json().catch(()=>({}));if(!res.ok){const ex=new Error(typeof data.detail==="string"?data.detail:"Photo inspection failed.");ex.status=res.status;throw ex;}if(data.guest_inspections){state.guestAllowance=data.guest_inspections;renderGuestAllowance();}data=await pollInspection(data.inspection_id);if(data.guest_inspections){state.guestAllowance=data.guest_inspections;renderGuestAllowance();}finishStages("photoStages",data.human_review_required);state.lastPhoto=data;$("#photoFactStatus").textContent=data.human_review_required?"REVIEW REQUIRED":"RESULT READY";renderPhotoResult(data);$("#photoDoneText").textContent=(data.people||[]).length+" workers detected · "+(data.people||[]).filter(p=>p.assessment==="potential_missing_helmet").length+" potential concern(s). "+(data.human_review_required?"Stage 04 is now yours: a human must verify before any action.":"No human-review flag was returned.");$("#photoDoneReport").href=data.report_url||"#";$("#photoDone").classList.add("show");await loadReports();}
+  catch(e){await refreshGuestAllowance();err("#photoError","Inspection failed — "+(e.message||"the service did not return a result.")+(isGuest()&&e.status>=500?" This live inspection attempt used 1 guest credit — credits are not refunded when the AI pipeline fails.":""));$("#photoFactStatus").textContent="FAILED — READY TO RETRY";}
+  finally{stopElapsed();stopStages(false);$("#photoProcessing").classList.remove("show");$("#photoFrame").classList.remove("scanning");btn.disabled=!state.photo||guestBlocked();btn.textContent="Run safety inspection →";$("#photoHint").textContent=state.photo?"READY — IMAGE LOADED":"AWAITING IMAGE";}
+});
+function renderPhotoResult(data){
+  const people=Array.isArray(data.people)?data.people:[], visible=people.filter(p=>p.assessment==="helmet_visible").length, good=data.overall_result==="all_helmets_visible";
+  const ov=$("#photoOverall");ov.textContent=pretty(data.overall_result||"uncertain");ov.className="a-value "+(good?"good":"warn");
+  $("#photoAssess").classList.toggle("good",good);
+  const badge=$("#photoReviewBadge");badge.textContent=data.human_review_required?"Human review required":"No review flag returned";badge.className="badge "+(data.human_review_required?"warn":"safe");
+  const concerns=people.filter(p=>p.assessment==="potential_missing_helmet").length, uncertain=people.filter(p=>p.assessment!=="helmet_visible"&&p.assessment!=="potential_missing_helmet").length;
+  $("#photoPeople").textContent=people.length;$("#photoSafe").textContent=visible;$("#photoConcerns").textContent=concerns;$("#photoNeedsReview").textContent=uncertain;
+  $("#photoResultImage").src=data.image_url||state.photoUrl||"";
+  $("#photoResultCaption").textContent="SOURCE IMAGE — "+(data.source_image||state.photo?.name||"AS SUBMITTED");
+  const grid=$("#photoWorkers");grid.innerHTML=people.length?"":'<div class="empty"><strong>No worker assessments</strong>The service returned no individual worker findings for this image.</div>';
+  for(const p of people){const safe=p.assessment==="helmet_visible", concern=p.assessment==="potential_missing_helmet";const el=document.createElement("article");el.className="worker "+(safe?"is-safe":concern?"is-concern":"");el.innerHTML='<div class="worker-top"><span class="worker-id"><span class="w-ico">'+(safe?"✓":concern?"!":"?")+'</span><strong>Worker '+esc(p.person_number??"—")+'</strong></span><span class="badge '+(safe?"safe":concern?"bad":"warn")+'">'+esc(pretty(p.assessment||"uncertain"))+"</span></div><dl><dt>Head visibility</dt><dt>Helmet observation</dt><dd>"+esc(pretty(p.head_visibility||"unknown"))+"</dd><dd>"+esc(pretty(p.helmet_observation||"unknown"))+"</dd></dl><p>"+esc(p.evidence||"No visual evidence supplied.")+"</p>";grid.appendChild(el);}
+  $("#photoReportLink").href=data.report_url||"#";
+  const open=()=>{const c=state.reports.find(r=>r.id===data.inspection_id);c?navigate("/reports/"+encodeURIComponent(c.id)):data.report_url&&window.open(data.report_url,"_blank","noopener");};
+  $("#photoResultDetail").onclick=open;$("#photoDoneDetail").onclick=open;
+  $("#photoResults").classList.add("show");$("#photoResults").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ---------- video flow ---------- */
+function selectVideo(file){if(!file)return;if(guestBlocked()){$("#videoInput").value="";err("#videoError","Demo inspection limit reached — you've used both inspections in this guest session. Sign in to continue inspecting.");return;}err("#videoError","");const ok=file.type==="video/mp4"||file.name.toLowerCase().endsWith(".mp4");if(!ok){err("#videoError","Invalid file — choose an MP4 video.");return;}if(file.size>100*1048576){err("#videoError","File too large — this video exceeds the 100 MB limit.");return;}state.video=file;state.videoSeconds=null;$("#videoDropzone").hidden=true;if(state.videoUrl)URL.revokeObjectURL(state.videoUrl);state.videoUrl=URL.createObjectURL(file);const v=$("#videoPreview");v.src=state.videoUrl;$("#videoSelected").classList.add("show");$("#videoFileName").textContent=file.name;$("#videoFileMeta").textContent="EVIDENCE LOADED — READY FOR INSPECTION";$("#videoFactType").textContent="MP4 · "+(file.type||"video/mp4");$("#videoFactSize").textContent=mb(file.size);$("#videoFactDuration").textContent="READING…";$("#videoFactStatus").textContent="READY";v.onloadedmetadata=()=>{state.videoSeconds=v.duration;$("#videoFactDuration").textContent=isFinite(v.duration)?v.duration.toFixed(1)+" SEC · "+v.videoWidth+"×"+v.videoHeight:"UNAVAILABLE";};const btn=$("#runVideo");btn.disabled=guestBlocked();btn.textContent="Run safety inspection →";$("#videoActionBar").classList.remove("idle");$("#videoHint").textContent="READY — VIDEO LOADED";$("#videoDone").classList.remove("show");$("#videoResults").classList.remove("show");}
+function clearVideo(){state.video=null;state.videoSeconds=null;$("#videoInput").value="";$("#videoDropzone").hidden=false;if(state.videoUrl)URL.revokeObjectURL(state.videoUrl);state.videoUrl=null;$("#videoPreview").removeAttribute("src");$("#videoFrame").classList.remove("scanning");$("#videoSelected").classList.remove("show");$("#runVideo").disabled=true;$("#videoActionBar").classList.add("idle");$("#videoHint").textContent="AWAITING MP4";err("#videoError","");$("#videoDone").classList.remove("show");}
+$("#videoInput").addEventListener("change",e=>selectVideo(e.target.files[0]));
+$("#clearVideo").addEventListener("click",clearVideo);
+$("#runVideo").addEventListener("click",async()=>{
+  if(guestBlocked()){err("#videoError","Demo inspection limit reached — you've used both inspections in this guest session. Sign in to continue inspecting.");renderGuestAllowance();return;}
+  if(!state.video)return;const btn=$("#runVideo");btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Processing evidence…';$("#videoHint").textContent="PROCESSING — DO NOT CLOSE";$("#videoFrame").classList.add("scanning");$("#videoFactStatus").textContent="ANALYZING";$("#videoProcessing").classList.add("show");startElapsed($("#videoProcessing"));startStages("videoStages",20000,4);err("#videoError","");$("#videoDone").classList.remove("show");$("#videoResults").classList.remove("show");
+  try{const fd=new FormData();fd.append("file",state.video);const res=await fetch("/api/inspect/video",{method:"POST",headers:{"x-csrf-token":await ensureCsrf()},body:fd});let data=await res.json().catch(()=>({}));if(!res.ok){const ex=new Error(typeof data.detail==="string"?data.detail:"Video inspection failed.");ex.status=res.status;throw ex;}if(data.guest_inspections){state.guestAllowance=data.guest_inspections;renderGuestAllowance();}data=await pollInspection(data.inspection_id);if(data.guest_inspections){state.guestAllowance=data.guest_inspections;renderGuestAllowance();}finishStages("videoStages",true,true);state.lastVideo=data;$("#videoFactStatus").textContent="REVIEW REQUIRED";renderVideoResult(data);$("#videoDoneText").textContent=data.overall_assessment||"Review completed. Human review is required for sampled-frame findings.";$("#videoDoneReport").href=data.report_url||"#";$("#videoDone").classList.add("show");await loadReports();renderVideoResult(data);}
+  catch(e){await refreshGuestAllowance();err("#videoError","Inspection failed — "+(e.message||"the service did not return a result.")+(isGuest()&&e.status>=500?" This live inspection attempt used 1 guest credit — credits are not refunded when the AI pipeline fails.":""));$("#videoFactStatus").textContent="FAILED — READY TO RETRY";}
+  finally{stopElapsed();stopStages(false);$("#videoProcessing").classList.remove("show");$("#videoFrame").classList.remove("scanning");btn.disabled=!state.video||guestBlocked();btn.textContent="Run safety inspection →";$("#videoHint").textContent=state.video?"READY — VIDEO LOADED":"AWAITING MP4";}
+});
+function renderVideoResult(data){
+  if(!data)return;
+  $("#videoOverall").textContent=data.overall_assessment||"Review completed.";
+  $("#videoReportLink").href=data.report_url||"#";
+  $("#videoFileMetric").textContent=state.video?state.video.name:(data.source_video||"—");
+  $("#videoDuration").textContent=state.videoSeconds&&isFinite(state.videoSeconds)?state.videoSeconds.toFixed(1)+"s":"In report";
+  const ok=Number(data.successful_frame_reviews||0), bad=Number(data.failed_frame_reviews||0);
+  $("#videoFrames").textContent=(ok+bad)+" · "+ok+" / "+bad;
+  const id=idFromUrl(data.report_url||"","");const rep=state.reports.find(r=>r.id===id);
+  $("#videoConcerns").textContent=rep?String(rep.concernCount):"In report";
+  const tsBox=$("#videoTimestamps");
+  if(rep&&rep.frames.length){$("#videoEvidenceText").innerHTML="<strong>Timestamped evidence inside the report:</strong> "+rep.frames.length+" sampled frame(s) with worker findings at the moments below. Flagged timestamps need verification against the footage.";tsBox.innerHTML=rep.frames.map(f=>'<span class="ts-chip'+(f.flagged?" flag":"")+'">'+f.timestamp.toFixed(2)+"s"+(f.flagged?" · FLAG":"")+"</span>").join("");}
+  else{tsBox.innerHTML="";}
+  const open=()=>{const c=state.reports.find(r=>r.id===id);c?navigate("/reports/"+encodeURIComponent(c.id)):data.report_url&&window.open(data.report_url,"_blank","noopener");};
+  $("#videoResultDetail").onclick=open;$("#videoDoneDetail").onclick=open;
+  $("#videoResults").classList.add("show");$("#videoResults").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ---------- dropzones + quick start ---------- */
+function dropzoneKind(zone){if(!zone)return"photo";if(zone.id==="videoDropzone"||zone.dataset.quickDrop==="video")return"video";return"photo";}
+function dropzone(zone,cb){if(!zone)return;["dragenter","dragover"].forEach(n=>zone.addEventListener(n,e=>{e.preventDefault();zone.classList.add("over");}));["dragleave","drop"].forEach(n=>zone.addEventListener(n,e=>{e.preventDefault();zone.classList.remove("over");}));zone.addEventListener("drop",e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)cb(f);});}
+dropzone($("#photoDropzone"),f=>{setInput($("#photoInput"),f);selectPhoto(f);});
+dropzone($("#videoDropzone"),f=>{setInput($("#videoInput"),f);selectVideo(f);});
+$$("[data-quick-drop]").forEach(z=>dropzone(z,f=>{if(z.dataset.quickDrop==="photo"){setInput($("#photoInput"),f);navigate("/photo");selectPhoto(f);}else{setInput($("#videoInput"),f);navigate("/video");selectVideo(f);}}));
+/* Guests upload directly: live inspections are governed by the backend
+   guest allowance (see renderGuestAllowance), not by a gate modal. */
+$("#overviewPhotoInput").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;setInput($("#photoInput"),f);navigate("/photo");selectPhoto(f);e.target.value="";});
+$("#overviewVideoInput").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;setInput($("#videoInput"),f);navigate("/video");selectVideo(f);e.target.value="";});
+$$("[data-guest-signin]").forEach(b=>b.addEventListener("click",()=>{const lb=$("#logoutBtn");if(lb)lb.click();}));
+
+/* ---------- interface preferences (local only, preserved) ---------- */
+function loadPrefs(){const d={classes:{helmets:true,vests:false,harness:false,zones:false},confidence:70,mode:"standard"};const p={...d,...readJSON(PREF_KEY,{})};p.classes={...d.classes,...(p.classes||{})};/* Unsupported classes are roadmap features: forced off and disabled regardless of any stored preference, and never sent to the backend. */p.classes.vests=false;p.classes.harness=false;p.classes.zones=false;$$("[data-pref-class]").forEach(i=>{const unsupported=["vests","harness","zones"].includes(i.dataset.prefClass);i.checked=unsupported?false:!!p.classes[i.dataset.prefClass];i.disabled=unsupported;});for(const s of["#confidenceRange","#confidenceRangeVideo"]){const el=$(s);if(el){el.value=p.confidence;el.disabled=true;}}$$("[data-review-mode]").forEach(x=>{x.disabled=true;});const a=$("#confidenceValue"),b=$("#confidenceValueVideo");if(a)a.textContent=p.confidence+"%";if(b)b.textContent=p.confidence+"%";$$("[data-review-mode]").forEach(x=>x.classList.toggle("on",x.dataset.reviewMode===(p.mode||"standard")));}
+function savePrefs(){const p={classes:{},confidence:Number(($("#confidenceRange")||{}).value||70),mode:$("[data-review-mode].on")?.dataset.reviewMode||"standard"};for(const k of["helmets","vests","harness","zones"])p.classes[k]=$$('[data-pref-class="'+k+'"]').some(i=>i.checked);try{localStorage.setItem(PREF_KEY,JSON.stringify(p));}catch(_){}}
+$$("[data-pref-class]").forEach(i=>i.addEventListener("change",()=>{$$('[data-pref-class="'+i.dataset.prefClass+'"]').forEach(x=>x.checked=i.checked);savePrefs();}));
+[$("#confidenceRange"),$("#confidenceRangeVideo")].filter(Boolean).forEach(el=>el.addEventListener("input",()=>{for(const s of["#confidenceRange","#confidenceRangeVideo"]){const x=$(s);if(x)x.value=el.value;}const a=$("#confidenceValue"),b=$("#confidenceValueVideo");if(a)a.textContent=el.value+"%";if(b)b.textContent=el.value+"%";savePrefs();}));
+$$("[data-review-mode]").forEach(b=>b.addEventListener("click",()=>{$$("[data-review-mode]").forEach(x=>x.classList.toggle("on",x.dataset.reviewMode===b.dataset.reviewMode));savePrefs();}));
+loadPrefs();
+
+/* ---------- library controls ---------- */
+$("#reportSearch").addEventListener("input",e=>{state.search=e.target.value;renderLibrary();});
+$("#reportSort").addEventListener("change",e=>{state.sort=e.target.value;renderLibrary();});
+$$("[data-filter]").forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.filter;$$("[data-filter]").forEach(x=>x.classList.toggle("on",x===b));renderLibrary();}));
+$("#refreshReports").addEventListener("click",loadReports);
+$("#selectAllReports").addEventListener("change",e=>{filtered().forEach(r=>e.target.checked?state.selected.add(r.id):state.selected.delete(r.id));renderLibrary();});
+$("#exportSelected").addEventListener("click",()=>{const rows=state.reports.filter(r=>state.selected.has(r.id));const csv=[["report_id","source_file","type","created_at","overall_assessment","concern_observations","worker_observations","human_review_status"],...rows.map(r=>[r.id,r.sourceName,r.isVideo?"video":"photo",r.created?.toISOString()||"",r.overall,r.concernCount,r.observationCount,reviewFor(r).label])].map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");blobDownload(new Blob([csv],{type:"text/csv;charset=utf-8"}),"SOPProof_selected_reports.csv");});
+
+/* ---------- detail + human verification (browser-local) ---------- */
+function saveReview(id,patch){const all=reviews();all[id]={...(all[id]||{}),...patch,updatedAt:new Date().toISOString()};try{reviewStore().setItem(reviewKey(),JSON.stringify(all));}catch(_){toast("Could not save in this browser.");}const r=state.reports.find(x=>x.id===id);if(r)r.review=reviewFor(r);}
+/* Illustrative explanations for the synthetic video demo only, derived
+   strictly from each frame's stored status. Real reports return null and
+   keep their stored evidence text unchanged. */
+function demoFrameExplanation(r,p){if(!r||!isDemoReport(r)||!r.isVideo)return null;const s=String(p.status||"");if(/uncertain|potential missing|review failed/i.test(s)||p.fFlagged)return "Hard-hat visibility is uncertain in this frame. Human verification is required.";if(/helmet visible/i.test(s))return "Worker detected. Hard hat appears visible in the reviewed frame.";return null;}
+function renderDetail(id){
+  const r=state.reports.find(x=>x.id===id);
+  if(!r){$("#detailTitle").textContent="Report not found";$("#detailSub").textContent="IT MAY HAVE BEEN REMOVED, OR HISTORY HAS NOT LOADED";$("#detailEvidence").innerHTML='<div class="ph">Return to the evidence library and refresh.</div>';$("#detailOverall").textContent="Unavailable";return;}
+  state.detailId=id;
+  $("#detailCrumb").textContent=r.isVideo?"Management / Video evidence record":"Management / Photo evidence record";
+  $("#detailTitle").textContent=r.sourceName||r.title;
+  $("#detailSub").textContent=(r.isVideo?"VIDEO INSPECTION":"PHOTO INSPECTION")+" · "+fmtDate(r.created).toUpperCase()+" · REPORT "+(demoDisplayId(r)||("#"+(r.id||"").slice(0,8).toUpperCase()));
+  const good=/all helmets visible|no potential/i.test(r.overall)&&r.concernCount===0;
+  const ov=$("#detailOverall");ov.textContent=r.overall;ov.className="a-value "+(good?"good":"warn");
+  $("#detailAssess").classList.toggle("good",good);
+  $("#detailStatus").innerHTML=reviewBadge(r);
+  $("#detailFinding").textContent=r.isVideo?((r.sampledCount||r.frames.length)+" sampled frames · "+r.successfulReviews+" successful AI reviews, "+r.failedReviews+" failed · "+r.concernCount+" concern observation(s) across frames. "+r.summary):(r.peopleCount+" workers detected · "+r.safeCount+" helmet-visible, "+r.concernCount+" requiring review. "+r.summary);
+  $("#detailMeta").innerHTML="<div><b>SOURCE&nbsp;</b> "+esc(r.sourceName)+"</div><div><b>GENERATED&nbsp;</b> "+esc(fmtDate(r.created))+"</div><div><b>TYPE&nbsp;</b> "+(r.isVideo?"MP4 video":"Workplace image")+"</div><div><b>REPORT ID&nbsp;</b> "+esc(demoDisplayId(r)||r.id)+"</div><div><b>AI RESULT&nbsp;</b> "+esc(r.overall)+"</div>"+(r.isVideo?"<div><b>FRAMES&nbsp;</b> "+(r.sampledCount||r.frames.length)+" sampled of "+(r.frameCount||"—")+"</div>":"");
+  $("#downloadDetailReport").onclick=()=>downloadReport(r.id);
+  $("#openDetailReport").href=r.url;
+  const stage=$("#detailEvidence");
+  if(r.isVideo&&r.mediaUrl){const poster=r.frames.find(fr=>fr.imageUrl)?.imageUrl||r.thumbnailUrl||"";stage.innerHTML='<video id="detailVideo" controls playsinline preload="metadata"'+(poster?' poster="'+esc(poster)+'"':"")+'><source src="'+esc(r.mediaUrl)+'" type="video/mp4">Video playback is not supported in this browser.</video>';}
+  else if(!r.isVideo&&r.mediaUrl)stage.innerHTML='<img src="'+esc(r.mediaUrl)+'" alt="Original workplace image" onerror="this.parentElement.innerHTML=\'<div class=&quot;ph&quot;>Original source image is not available on the server.</div>\'">';
+  else stage.innerHTML='<div class="ph">Original source media is unavailable here. Open the HTML report for the saved frame evidence.</div>';
+  $("#overlayNote").textContent="This saved report holds assessment text and frame stills. SAM 3.1 returned bounding boxes and one-bit masks during inspection, but neither is stored with this report — boxes were used only to associate helmets with workers, and saved results keep confidences and statuses, not geometry. No overlay can be drawn accurately from the stored data, so no boxes or masks are fabricated and no tracking IDs are claimed.";
+  $("#overlayBadge").textContent="No stored SAM geometry";
+  const workers=$("#detailWorkers");
+  if(!r.isVideo&&r.people.length){workers.innerHTML='<div class="worker-grid">'+r.people.map(p=>'<article class="worker '+(p.safe?'is-safe':'')+'"><div class="worker-top"><strong>'+esc(p.name)+'</strong><span class="badge '+(p.safe?"safe":"warn")+'">'+esc(p.status)+"</span></div><dl><dt>Head visibility</dt><dt>Helmet observation</dt><dd>"+esc(p.head||"—")+"</dd><dd>"+esc(p.helmetObs||"—")+"</dd></dl><p>"+esc(p.evidence||"")+"</p></article>").join("")+"</div>";}
+  else if(r.isVideo){const flat=r.frames.flatMap(f=>f.people.map(p=>({...p,frame:f.label,ts:f.timestamp,fFlagged:f.flagged})));workers.innerHTML=flat.length?'<p style="font-size:11.5px;color:var(--mut);margin:0 0 10px">Worker observations by sampled frame — the same person may appear in several frames. Identities are frame-local, not tracked persons.</p><div class="worker-grid">'+flat.slice(0,12).map(p=>{const expl=demoFrameExplanation(r,p);return '<article class="worker '+(p.safe?'is-safe':'')+'"><div class="worker-top"><strong>'+esc(p.name)+" · "+p.ts.toFixed(1)+'s</strong><span class="badge '+(p.safe?"safe":"warn")+'">'+esc(p.status)+"</span></div><p>"+(expl?esc(expl)+'<span class="demo-expl">Illustrative demo explanation \u2014 not live model output.</span>':esc(p.evidence||""))+"</p></article>";}).join("")+"</div>":"";}
+  else workers.innerHTML="";
+  const tw=$("#timelineWrap"),tl=$("#videoTimeline");tl.replaceChildren();$("#frameFocus").classList.remove("show","detail-frame-uncertain","detail-frame-safe");
+  if(r.isVideo&&r.frames.length){tw.hidden=false;
+    const oldStrip=$("#frameStrip"); if(oldStrip)oldStrip.remove();
+    const strip=document.createElement("div");strip.id="frameStrip";strip.className="worker-grid";strip.style.marginBottom="12px";
+    strip.innerHTML=r.frames.map(f=>'<article class="worker '+(f.flagged?"detail-frame-uncertain":"detail-frame-safe")+'" style="padding:9px"><span class="sample-thumb" style="height:110px">'+(f.imageUrl?'<img src="'+esc(f.imageUrl)+'" alt="" loading="lazy" onerror="this.remove()">':"")+'</span><div class="worker-top" style="margin-top:8px"><strong style="font-size:11.5px">'+esc(f.label)+" · "+f.timestamp.toFixed(2)+'s</strong><span class="badge '+(f.flagged?"warn":"safe")+'">'+esc(f.status)+"</span></div></article>").join("");
+    tl.before(strip);
+    for(const f of r.frames){const chip=document.createElement("button");chip.type="button";chip.className="tchip"+(f.flagged?" flag":"");chip.textContent=f.timestamp.toFixed(2)+"s"+(f.flagged?" · FLAGGED":"");chip.addEventListener("click",()=>{$$(".tchip",tl).forEach(x=>x.classList.remove("on"));chip.classList.add("on");const vid=$("#detailVideo");if(vid){try{vid.currentTime=f.timestamp;}catch(_){}}if(f.imageUrl){$("#frameFocusImage").src=f.imageUrl;$("#frameFocusCaption").textContent=f.label+" · "+f.timestamp.toFixed(3)+" SECONDS · "+f.status.toUpperCase();const ff=$("#frameFocus");ff.classList.toggle("detail-frame-uncertain",!!f.flagged);ff.classList.toggle("detail-frame-safe",!f.flagged);ff.classList.add("show");}});tl.appendChild(chip);}}
+  else tw.hidden=true;
+  $("#inspectorNote").value=(reviews()[r.id]||{}).note||"";
+  paintReview(r);
+  $("#confirmViolation").onclick=()=>{saveReview(r.id,{status:"confirmed",note:$("#inspectorNote").value.trim()});paintReview(r);renderOverview();renderLibrary();toast(isGuest()?"DEMO ACTION — confirmed by demo reviewer. Saved locally only; not an official inspection decision.":"Violation confirmed by reviewer. Saved in this browser.");};
+  $("#dismissViolation").onclick=()=>{saveReview(r.id,{status:"dismissed",note:$("#inspectorNote").value.trim()});paintReview(r);renderOverview();renderLibrary();toast(isGuest()?"DEMO ACTION — dismissed by demo reviewer. Saved locally only; not an official inspection decision.":"Finding dismissed as false positive. Saved in this browser.");};
+  $("#saveInspectorNote").onclick=()=>{const note=$("#inspectorNote").value.trim();if(isGuest()){if(!note){toast("DEMO ACTION — enter a note before saving.");$("#inspectorNote").focus();return;}if(note.length>2000){toast("DEMO ACTION — note is too long. Keep it under 2,000 characters.");$("#inspectorNote").focus();return;}}saveReview(r.id,{note});paintReview(r);toast(isGuest()?"DEMO ACTION — note saved locally only; not an official inspection decision.":"Inspector note saved in this browser.");};
+}
+function paintReview(r){const guest=isGuest();const v=reviewFor(r);const lbl=$("#demoActionLabel");if(lbl)lbl.hidden=!guest;const b=$("#detailReviewBadge");b.className="badge "+(v.status==="verified"?(guest&&v.action==="dismissed"?"info":"safe"):v.status==="auto"?"info":"warn");b.textContent=v.status==="pending"?"Human review required":v.label;$("#detailStatus").innerHTML=reviewBadge(r);$("#reviewPanelText").textContent=v.status==="verified"?(guest?("DEMO ACTION — saved locally only; not an official inspection decision. Demo decision: "+(v.action==="confirmed"?"confirmed by demo reviewer":"dismissed by demo reviewer")+". You can switch the decision at any time."):("Decision recorded: "+(v.action==="confirmed"?"violation confirmed by a reviewer":"dismissed as a false positive")+". The decision can be changed at any time.")):"Review the evidence first. Confirm only what the evidence actually shows — AI output alone is never a confirmed violation.";const cf=$("#confirmViolation"),df=$("#dismissViolation");if(cf){cf.classList.toggle("on",guest&&v.action==="confirmed");cf.setAttribute("aria-pressed",guest&&v.action==="confirmed"?"true":"false");}if(df){df.classList.toggle("on",guest&&v.action==="dismissed");df.setAttribute("aria-pressed",guest&&v.action==="dismissed"?"true":"false");}const echo=$("#demoNoteEcho");if(echo){const note=(reviews()[r.id]||{}).note||"";echo.hidden=!(guest&&note);echo.textContent=note?("Saved demo note: "+note):"";}}
+
+/* ---------- single delegated click handler ---------- */
+document.addEventListener("click",e=>{
+  const route=e.target.closest("[data-route]");if(route){e.preventDefault();navigate(route.dataset.route);return;}
+  const go=e.target.closest("[data-go]");if(go){e.preventDefault();navigate(go.dataset.go);return;}
+  const open=e.target.closest("[data-open]");if(open){navigate("/reports/"+encodeURIComponent(open.dataset.open));return;}
+  const dl=e.target.closest("[data-download]");if(dl){downloadReport(dl.dataset.download);return;}
+  const cp=e.target.closest("[data-copy]");if(cp){const t=cp.dataset.copy;if(navigator.clipboard?.writeText)navigator.clipboard.writeText(t).then(()=>toast("Report ID copied.")).catch(()=>toast(t));else toast(t);return;}
+  const sm=e.target.closest("[data-sample]");if(sm){loadSample(sm.dataset.sample,sm.dataset.sampleType);return;}
+});
+/* Recent-evidence rows are focusable (role=button): make Enter/Space activate them.
+   Clicks on the nested Open button keep using the click handler above. */
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  const item=e.target.closest?.(".ev-item");if(!item||e.target.closest("button"))return;
+  e.preventDefault();navigate("/reports/"+encodeURIComponent(item.dataset.open));
+});
+
+/* ---------- routing ---------- */
+const META={welcome:{crumb:'SOPPROOF <b>/</b> WELCOME',title:"Welcome"},login:{crumb:'SOPPROOF <b>/</b> SIGN IN',title:"Sign in"},register:{crumb:'SOPPROOF <b>/</b> CREATE ACCOUNT',title:"Create account"},overview:{crumb:'SOPPROOF <b>/</b> OPERATIONS',title:"Safety overview"},photo:{crumb:'SOPPROOF <b>/</b> PHOTO INSPECTION',title:"Photo inspection"},video:{crumb:'SOPPROOF <b>/</b> VIDEO INSPECTION',title:"Video inspection"},reports:{crumb:'SOPPROOF <b>/</b> EVIDENCE LIBRARY',title:"Inspection reports"},detail:{crumb:'SOPPROOF <b>/</b> EVIDENCE RECORD',title:"Inspection report"}};
+const PUBLIC_ROUTES=["welcome","login","register"];
+function fromPath(){const p=location.pathname.split("/").filter(Boolean);if(!p.length)return{route:"welcome"};if(p[0]==="overview")return{route:"overview"};if(p[0]==="login")return{route:"login"};if(p[0]==="register")return{route:"register"};if(p[0]==="reports"&&p[1])return{route:"detail",id:decodeURIComponent(p[1])};if(["photo","video","reports"].includes(p[0]))return{route:p[0]};return{route:"overview"};}
+function navigate(path){const s=path.startsWith("/")?path:"/"+path;if(location.pathname!==s)history.pushState({},"",s);activate(fromPath());}
+function activate(p){
+  if(state.authReady&&!state.user&&!PUBLIC_ROUTES.includes(p.route)){history.replaceState({},"","/login");p={route:"login"};}
+  if(state.authReady&&state.user&&(p.route==="login"||p.route==="register")){history.replaceState({},"","/overview");p={route:"overview"};}
+  state.route=p.route;state.detailId=p.id||null;const isWelcome=PUBLIC_ROUTES.includes(p.route);const sb=$("#appSidebar"),mn=$("#appMain");if(sb)sb.hidden=isWelcome;if(mn)mn.hidden=isWelcome;document.body.dataset.screen=isWelcome?"welcome":"app";
+  if(p.route==="register"){const inv=new URLSearchParams(location.search).get("invite");if(inv)$("#registerInvite").value=inv;}
+  if(p.route==="reports")renderAdminInvites();$$("[data-view]").forEach(v=>{const on=v.dataset.view===p.route;v.hidden=!on;v.classList.toggle("active",on);});$$("[data-route]").forEach(a=>{const on=a.dataset.route==="/"+p.route||(p.route==="detail"&&a.dataset.route==="/reports");a.classList.toggle("active",on);on?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current");});const m=META[p.route]||META.overview;const crumb=$("#pageCrumb"),ttl=$("#pageTitle");if(crumb)crumb.innerHTML=m.crumb;if(ttl)ttl.textContent=m.title;document.title="SOPProof | "+m.title;if(p.route==="detail"&&p.id){state.reports.length?renderDetail(p.id):loadReports();}window.scrollTo({top:0});}
+window.addEventListener("popstate",()=>activate(fromPath()));
+
+/* ---------- auth ---------- */
+async function ensureCsrf(){if(state.csrf)return state.csrf;try{const r=await fetch("/api/auth/csrf",{cache:"no-store"});const d=await r.json();state.csrf=d.csrf_token||"";}catch(_){state.csrf="";}return state.csrf;}
+async function authPost(url,body){const t=await ensureCsrf();const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-csrf-token":t},body:JSON.stringify(body||{})});const data=await res.json().catch(()=>({}));return{res,data};}
+function authError(el,data,fallback){el.textContent=(data&&typeof data.detail==="string")?data.detail:fallback;el.classList.add("show");}
+function reflectUser(){const box=$("#userBox");if(!box)return;const guest=!!(state.user&&state.user.is_guest);document.body.classList.toggle("is-guest",guest);if(state.user){box.hidden=false;$("#userEmail").innerHTML=guest?'Mode<span class="role">GUEST DEMO</span>':esc(state.user.email)+(state.user.is_admin?'<span class="role">ADMIN</span>':"");$("#logoutBtn").textContent=guest?"Exit Demo":"Log out";}else{box.hidden=true;}const inv=$("#adminInvites");if(inv)inv.hidden=!(state.user&&state.user.is_admin);$$("[data-guest-only]").forEach(el=>{el.hidden=!guest;});applyGuestMode(guest);}
+function applyGuestMode(guest){/* Guests may upload and run live inspections until their session allowance is used; renderGuestAllowance governs the run buttons. */for(const id of["#photoInput","#videoInput","#overviewPhotoInput","#overviewVideoInput"]){const el=$(id);if(el)el.disabled=false;}for(const id of["#photoDropzone","#videoDropzone"]){const el=$(id);if(el)el.classList.remove("guest-locked");}renderGuestAllowance();}
+async function loadMe(){try{const r=await fetch("/api/auth/me",{cache:"no-store"});if(r.ok){state.user=(await r.json()).user||null;state.guestAllowance=(state.user&&state.user.guest_inspections)||null;await ensureCsrf();}else{state.user=null;state.guestAllowance=null;}}catch(_){state.user=null;state.guestAllowance=null;}state.authReady=true;reflectUser();}
+$("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("#loginErr");err.classList.remove("show");try{const{res,data}=await authPost("/api/auth/login",{email:$("#loginEmail").value.trim(),password:$("#loginPassword").value});if(!res.ok)throw data;state.user=data.user;state.csrf="";await ensureCsrf();reflectUser();state.reports=[];navigate("/overview");loadReports();toast("Welcome back.");}catch(data){authError(err,data,"Sign-in failed. Check your email and password.");}});
+$("#registerForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("#registerErr");err.classList.remove("show");try{const{res,data}=await authPost("/api/auth/register",{invite_token:$("#registerInvite").value.trim(),email:$("#registerEmail").value.trim(),password:$("#registerPassword").value});if(!res.ok)throw data;state.user=data.user;state.csrf="";await ensureCsrf();reflectUser();state.reports=[];navigate("/overview");loadReports();toast("Account created — welcome to SOPProof.");}catch(data){authError(err,data,"Registration could not be completed.");}});
+$("#logoutBtn").addEventListener("click",async()=>{const wasGuest=!!(state.user&&state.user.is_guest);if(wasGuest)clearDemoReviewState();try{await authPost("/api/auth/logout",{});}catch(_){}state.user=null;state.guestAllowance=null;state.csrf="";state.reports=[];reflectUser();navigate("/login");toast(wasGuest?"Demo exited.":"Signed out.");});
+$("#guestBtn").addEventListener("click",async()=>{try{const{res,data}=await authPost("/api/auth/guest",{});if(!res.ok)throw data;clearDemoReviewState();state.user=data.user;state.guestAllowance=(data.user&&data.user.guest_inspections)||null;state.csrf="";await ensureCsrf();reflectUser();state.reports=[];navigate("/overview");loadReports();toast("Welcome — this guest session includes 2 live AI inspections.");}catch(_){toast("Guest demo is unavailable right now.");}});
+$$("[data-exit-demo]").forEach(b=>b.addEventListener("click",()=>$("#logoutBtn").click()));
+async function renderAdminInvites(){const panel=$("#adminInvites");if(!panel)return;const isAdmin=!!(state.user&&state.user.is_admin);panel.hidden=!isAdmin;if(!isAdmin)return;try{const r=await fetch("/api/admin/invitations",{cache:"no-store"});if(!r.ok)return;const d=await r.json();const list=$("#inviteList");list.innerHTML=d.invitations.length?d.invitations.map(i=>'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><span style="font-size:12.5px">'+esc(i.email||"Any email")+' <span class="badge '+(i.status==="pending"?"warn":"info")+'">'+esc(i.status)+'</span></span>'+(i.status==="pending"?'<button class="btn small" type="button" data-revoke="'+i.id+'">Revoke</button>':"")+"</div>").join(""):'<p style="font-size:12.5px;color:var(--mut)">No invitations yet.</p>';$$("[data-revoke]",list).forEach(b=>b.addEventListener("click",async()=>{const t=await ensureCsrf();await fetch("/api/admin/invitations/"+b.dataset.revoke,{method:"DELETE",headers:{"x-csrf-token":t}});renderAdminInvites();toast("Invitation revoked.");}));}catch(_){}}
+$("#inviteForm").addEventListener("submit",async e=>{e.preventDefault();try{const t=await ensureCsrf();const res=await fetch("/api/admin/invitations",{method:"POST",headers:{"Content-Type":"application/json","x-csrf-token":t},body:JSON.stringify({email:$("#inviteEmail").value.trim()||null})});const data=await res.json().catch(()=>({}));if(!res.ok)throw data;$("#inviteLink").value=location.origin+(data.register_path||"/register");$("#inviteResult").hidden=false;renderAdminInvites();}catch(data){toast((data&&data.detail)||"Could not create invitation.");}});
+$("#copyInvite").addEventListener("click",()=>{const i=$("#inviteLink");i.select();navigator.clipboard&&navigator.clipboard.writeText(i.value);toast("Invitation link copied.");});
+
+/* ---------- theme + API health ---------- */
+const themeBtn=$("#themeToggle");
+const themeBtnWelcome=$("#themeToggleWelcome");
+function applyTheme(t){const v=t==="dark"?"dark":"light";document.documentElement.dataset.theme=v;for(const b of[themeBtn,themeBtnWelcome,$("#themeToggleLogin"),$("#themeToggleRegister")]){if(!b)continue;b.textContent=v==="dark"?"☀ Light":"☾ Dark";b.setAttribute("aria-label",v==="dark"?"Switch to light mode":"Switch to dark mode");}try{localStorage.setItem(THEME_KEY,v);}catch(_){}}
+const toggleTheme=()=>applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+themeBtn.addEventListener("click",toggleTheme);
+if(themeBtnWelcome)themeBtnWelcome.addEventListener("click",toggleTheme);
+for(const b of[$("#themeToggleLogin"),$("#themeToggleRegister")])if(b)b.addEventListener("click",toggleTheme);
+applyTheme((()=>{try{return localStorage.getItem(THEME_KEY)==="light"?"light":"dark";}catch(_){return "dark";}})());
+async function checkApi(){const box=$("#apiStatus"),txt=$("#apiStatusText"),sys=$("#sysLine");const setSys=(ok)=>{for(const id of["#sysSam","#sysClaude"]){const el=$(id);if(el){el.classList.toggle("sys-ok",ok);el.classList.toggle("sys-off",!ok);}}};try{const r=await fetch("/api/health",{cache:"no-store"});if(!r.ok)throw 0;const d=await r.json();const ok=d.status==="healthy";box.className="status-chip "+(ok?"ok":"bad");txt.textContent=ok?"API READY":"API CHECK FAILED";if(sys)sys.textContent=ok?"VISION SYSTEM · ONLINE":"VISION SYSTEM · CHECK FAILED";setSys(ok);}catch(_){box.className="status-chip bad";txt.textContent="API UNAVAILABLE";if(sys)sys.textContent="VISION SYSTEM · OFFLINE";setSys(false);}}
+(async()=>{checkApi();await loadMe();activate(fromPath());if(state.user)loadReports();})();
+})();
+</script>
+</body>
+</html>
+

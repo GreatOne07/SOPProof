@@ -1,0 +1,17 @@
+# SOPProof runtime dependencies (Azure App Service / local server).
+# Only packages imported by the running application and its pipeline
+# scripts are listed; transitive dependencies resolve via pip.
+# Development/test-only and notebook tooling are intentionally excluded.
+fastapi==0.162.0
+uvicorn==0.54.0
+starlette==1.10.0
+pydantic==2.14.2
+argon2-cffi==25.1.0
+openai==3.41.0
+python-dotenv==1.2.4
+python-multipart==0.0.32
+opencv-python-headless==5.0.0.93
+numpy==2.4.6
+pillow==13.0.0
+requests==2.34.2
+meta-sam-parser==0.1.0

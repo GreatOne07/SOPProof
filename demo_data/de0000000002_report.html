@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>SOPProof | Inspection Report</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 35px 20px;
+    background: #f1f5f9;
+    color: #172033;
+    font-family: -apple-system, BlinkMacSystemFont,
+                 "Segoe UI", Arial, sans-serif;
+}
+
+.container {
+    max-width: 1180px;
+    margin: auto;
+    padding: 38px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 35px rgba(15, 23, 42, 0.06);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.brand {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #111827;
+}
+
+.subtitle {
+    margin-top: 7px;
+    color: #64748b;
+    font-size: 15px;
+}
+
+.tag {
+    padding: 9px 14px;
+    border-radius: 30px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.summary {
+    background: #f8fafc;
+    border: 1px solid #e8edf4;
+    border-radius: 13px;
+    padding: 25px;
+    margin-bottom: 28px;
+}
+
+.summary p {
+    margin: 0 0 14px;
+    line-height: 1.5;
+}
+
+.result-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.result {
+    font-size: 26px;
+    font-weight: 800;
+    color: #c2410c;
+    margin-bottom: 16px;
+}
+
+.review {
+    display: inline-block;
+    padding: 7px 11px;
+    border-radius: 7px;
+    background: #fff7ed;
+    color: #c2410c;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+}
+
+.metric {
+    background: #ffffff;
+    border: 1px solid #e5eaf1;
+    border-radius: 11px;
+    padding: 17px;
+}
+
+.metric-number {
+    font-size: 25px;
+    font-weight: 800;
+    color: #172033;
+}
+
+.metric-label {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 6px;
+}
+
+.section-title {
+    font-size: 21px;
+    font-weight: 750;
+    margin: 30px 0 17px;
+    color: #172033;
+}
+
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #e5eaf1;
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    min-width: 850px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 15px 12px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid #e5eaf1;
+    font-size: 13px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+th {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+th:nth-child(1), td:nth-child(1) {
+    width: 11%;
+}
+
+th:nth-child(2), td:nth-child(2) {
+    width: 13%;
+}
+
+th:nth-child(3), td:nth-child(3) {
+    width: 17%;
+}
+
+th:nth-child(4), td:nth-child(4) {
+    width: 19%;
+}
+
+th:nth-child(5), td:nth-child(5) {
+    width: 40%;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+.assessment {
+    font-weight: 750;
+}
+
+.evidence {
+    color: #475569;
+}
+
+.description {
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+.limitations {
+    padding-left: 22px;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.notice {
+    margin-top: 30px;
+    padding: 18px 20px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    color: #92400e;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.footer {
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1px solid #e5eaf1;
+    color: #94a3b8;
+    font-size: 11px;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+
+    body {
+        padding: 12px;
+    }
+
+    .container {
+        padding: 20px;
+    }
+
+    .brand {
+        font-size: 27px;
+    }
+
+    .result {
+        font-size: 21px;
+    }
+
+    .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+@media print {
+
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .container {
+        max-width: none;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 15px;
+    }
+
+    .table-wrap {
+        overflow: visible;
+    }
+
+    table {
+        min-width: 0;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <div>
+            <div class="brand">SOPProof</div>
+
+            <div class="subtitle">
+                AI-Assisted Workplace Safety Inspection
+            </div>
+        </div>
+
+        <div class="tag">
+            INSPECTION REPORT
+        </div>
+
+    </div>
+
+
+    <div class="summary">
+
+        <p>
+            <strong>Source image:</strong>
+            de0000000010.jpg
+        </p>
+
+        <img src="/uploads/de0000000010.jpg" alt="Source workplace image for this inspection"
+             style="display:block;width:100%;max-height:460px;object-fit:contain;background:#0b1220;border-radius:10px;margin:14px 0 4px"
+             onerror="this.style.display='none'">
+
+        <p>
+            <strong>Generated:</strong>
+            04 November 2026, 03:07 PM IST
+        </p>
+
+        <div class="result-label">
+            OVERALL ASSESSMENT
+        </div>
+
+        <div class="result">
+            Potential Missing Helmet
+        </div>
+
+        <span class="review">
+            Human review required: Yes
+        </span>
+
+    </div>
+
+
+    <div class="metrics">
+
+        <div class="metric">
+            <div class="metric-number">2</div>
+            <div class="metric-label">People detected</div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-number">0</div>
+            <div class="metric-label">Helmet candidates</div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-number">0</div>
+            <div class="metric-label">Workers matched</div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-number">2</div>
+            <div class="metric-label">Workers needing review</div>
+        </div>
+
+    </div>
+
+
+    <div class="section-title">
+        Worker Inspection Results
+    </div>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Worker</th>
+                    <th>Head Visibility</th>
+                    <th>Helmet Observation</th>
+                    <th>Assessment</th>
+                    <th>Evidence</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+                
+        <tr>
+            <td>
+                <strong>Person 1</strong>
+            </td>
+
+            <td>Clear</td>
+
+            <td>Not Visible</td>
+
+            <td>
+                <span class="assessment"
+                      style="color:#c2410c">
+                    Potential Missing Helmet
+                </span>
+            </td>
+
+            <td class="evidence">DEMO: Precomputed example — the worker on the right has no helmet, so this is flagged for human verification.</td>
+        </tr>
+        
+
+        <tr>
+            <td>
+                <strong>Person 2</strong>
+            </td>
+
+            <td>Partially Obscured</td>
+
+            <td>Uncertain</td>
+
+            <td>
+                <span class="assessment"
+                      style="color:#64748b">
+                    Uncertain
+                </span>
+            </td>
+
+            <td class="evidence">DEMO: Precomputed example of an uncertain observation.</td>
+        </tr>
+        
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <div class="section-title">
+        Image Summary
+    </div>
+
+    <div class="description">
+        DEMO DATA: Precomputed demonstration using an AI-generated demo photograph, showing how a potential concern is presented for human review.
+    </div>
+
+
+    <div class="section-title">
+        Limitations
+    </div>
+
+    <ul class="limitations">
+        <li>DEMO DATA — precomputed demonstration report, not a real inspection.</li>
+    </ul>
+
+
+    <div class="notice">
+
+        <strong>Important:</strong>
+
+        SOPProof provides prototype, visual evidence-based
+        assistance. This report is not a certified safety audit
+        or a legal determination. Potential concerns require
+        human verification.
+
+    </div>
+
+
+    <div class="footer">
+        SOPProof | AI-Assisted Workplace Safety Inspection
+    </div>
+
+</div>
+
+</body>
+</html>
