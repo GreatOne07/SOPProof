@@ -6,7 +6,7 @@ import cv2
 
 from pathlib import Path
 
-from backend.meta_client import get_meta_client
+from backend.meta_client import describe_model_error, get_meta_client
 from backend.inspection import MODEL, INSPECTION_SCHEMA
 
 
@@ -313,27 +313,31 @@ def review_frame(
         detection_context
     )
 
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": prompt
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": image_url
+    try:
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": prompt
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": image_url
+                            }
                         }
-                    }
-                ]
-            }
-        ],
-        response_format=INSPECTION_SCHEMA
-    )
+                    ]
+                }
+            ],
+            response_format=INSPECTION_SCHEMA
+        )
+    except Exception as exc:
+        describe_model_error("Muse Spark video review", MODEL, exc)
+        raise
 
     content = response.choices[0].message.content
 

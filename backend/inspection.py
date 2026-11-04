@@ -5,12 +5,12 @@ import mimetypes
 
 from pathlib import Path
 
-from backend.meta_client import get_meta_client
+from backend.meta_client import claude_model, describe_model_error, get_meta_client
 from backend.sam_detector import detect_image, extract_boxes
 from backend.association import associate_helmets
 
 
-MODEL = "muse-spark-1.3"
+MODEL = claude_model()
 
 
 # Muse Spark structured-output schema
@@ -271,27 +271,31 @@ Return only the requested structured assessment.
 
     client = get_meta_client(timeout=120.0)
 
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": prompt
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": image_url
+    try:
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": prompt
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": image_url
+                            }
                         }
-                    }
-                ]
-            }
-        ],
-        response_format=INSPECTION_SCHEMA
-    )
+                    ]
+                }
+            ],
+            response_format=INSPECTION_SCHEMA
+        )
+    except Exception as exc:
+        describe_model_error("Muse Spark review", MODEL, exc)
+        raise
 
     content = response.choices[0].message.content
 

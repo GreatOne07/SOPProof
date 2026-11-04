@@ -5,10 +5,10 @@ import re
 
 from pathlib import Path
 
-from backend.meta_client import get_meta_client
+from backend.meta_client import describe_model_error, get_meta_client, sam_model
 
 
-MODEL = "sam-3.1"
+MODEL = sam_model()
 
 BOX_PATTERN = (
     r"<\|box;x1=(\d+);y1=(\d+);"
@@ -68,36 +68,40 @@ def detect_image(image_path, prompt):
 
     client = get_meta_client(timeout=120.0)
 
-    stream = client.responses.create(
-        model=MODEL,
-        input=[
-            {
-                "type": "message",
-                "role": "user",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": prompt
-                    },
-                    {
-                        "type": "input_image",
-                        "image_url": image_url
-                    }
-                ]
+    try:
+        stream = client.responses.create(
+            model=MODEL,
+            input=[
+                {
+                    "type": "message",
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "input_text",
+                            "text": prompt
+                        },
+                        {
+                            "type": "input_image",
+                            "image_url": image_url
+                        }
+                    ]
+                }
+            ],
+            stream=True,
+            metadata={
+                "mask_encoding": "one_bit",
+                "include_confidence": "true"
             }
-        ],
-        stream=True,
-        metadata={
-            "mask_encoding": "one_bit",
-            "include_confidence": "true"
-        }
-    )
+        )
 
-    chunks = []
+        chunks = []
 
-    for event in stream:
-        if event.type == "response.output_text.delta":
-            chunks.append(event.delta)
+        for event in stream:
+            if event.type == "response.output_text.delta":
+                chunks.append(event.delta)
+    except Exception as exc:
+        describe_model_error("SAM detection", MODEL, exc)
+        raise
 
     raw_text = "".join(chunks)
 
